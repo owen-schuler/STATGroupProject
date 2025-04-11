@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-## Section Three
+## Caden Rummel
 
 ```{r student3}
 
