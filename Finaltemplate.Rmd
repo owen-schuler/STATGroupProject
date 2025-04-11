@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-## Section Two
+## Owen Schuler
 
 ```{r student2}
 
