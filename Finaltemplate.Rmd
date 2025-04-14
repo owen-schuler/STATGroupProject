@@ -28,6 +28,8 @@ Go to jail space
 - Landing on "Go to jail" space sends the player directly to jail without collecting $200.
 In jail movement
 - the player can roll doubles to get out of jail, use the "get out of jail free" card, or pay $50. 
+Buying/Landing on properties
+- When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
 
 ```{r Student1}
 
