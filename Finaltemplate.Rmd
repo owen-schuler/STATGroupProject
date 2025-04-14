@@ -9,6 +9,25 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Luke Olson
+1. Rules
+Starting Cash
+- Every player begins with $1,500 to start, and once you're out of liquid cash you lose.
+Standard dice roll
+- Player moves forward the number of spaces shown on two six sided dice. 
+Rolling doubles
+- Player rolls doubles (same number on both dice) and gets another turn. 
+Three consecutive doubles
+- If a player rolls doubles three times in a row, they go directly to jail. 
+Passing Go
+- If a player passes "Go" they collect $200 from the bank.
+Chance Cards
+- Certain board spaces have chance cards on them which instruct the player to move to a different space, or pay/earn money. They can send players to jail, Go, or various properties. 
+Community Chest Cards
+- Certain board spaces have community chest cards on them which instruct the player to move to a different space, pay/earn money, or get out of jail free card. 
+Go to jail space
+- Landing on "Go to jail" space sends the player directly to jail without collecting $200.
+In jail movement
+- the player can roll doubles to get out of jail, use the "get out of jail free" card, or pay $50. 
 
 ```{r Student1}
 
@@ -21,11 +40,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-<<<<<<< HEAD
-## Braden Rummel
-=======
+
 ## Caden Rummel
->>>>>>> 67bb653827010885f650e41e2374ebeee5567b13
+
 
 ```{r student3}
 
