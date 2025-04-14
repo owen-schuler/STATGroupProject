@@ -21,7 +21,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
+<<<<<<< HEAD
 ## Braden Rummel
+=======
+## Caden Rummel
+>>>>>>> 67bb653827010885f650e41e2374ebeee5567b13
 
 ```{r student3}
 
@@ -32,5 +36,5 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Landen Frye
 
 ```{r student4}
-
+2+2
 ```
