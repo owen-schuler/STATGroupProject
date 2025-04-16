@@ -8,7 +8,7 @@ date: "2025-04-11"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Luke Olson
+
 1. Rules
 Starting Cash
 - Every player begins with $1,500 to start, and once you're out of liquid cash you lose.
@@ -30,6 +30,7 @@ In jail movement
 - the player can roll doubles to get out of jail, use the "get out of jail free" card, or pay $50. 
 Buying/Landing on properties
 - When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
+## Luke Olson
 
 ```{r Student1}
 #2. Let's Get Moving
@@ -37,10 +38,12 @@ Buying/Landing on properties
 library(tidyverse)
 
 #Creating the board
-monopoly_board = tibble (position = 0:39, name = c("Go", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go to Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest", "Pennsylvania Avenue", "Short Line", "Chance", "Park Place", "Luxury Tax", "Boardwalk"))
+monopoly_board = tibble (position = 0:39, name = c("Go", "Mediterranean Avenue", "Community Chest 1", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance 1", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest 2", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance 2", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go to Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest 3", "Pennsylvania Avenue", "Short Line", "Chance 3", "Park Place", "Luxury Tax", "Boardwalk"))
 
 #settings for the simulation
 n_players = 4
+n_turns = 500
+
 
 ```
 
