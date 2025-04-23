@@ -88,7 +88,8 @@ monopoly_colors = c("Brown" = "#8B4513", "Light Blue" = "#ADD8E6", "Pink" = "#FF
 simulate_player = function(turns = 1000) {
   position = 0
   landed = integer(turns)
-  
+
+#Doesn't take into account landing in jail moving you to the jail yet, or the doubles to get out. Needs to get worked on yet. 
   for (i in 1:turns) {
     roll = sample(1:6, 1) + sample(1:6, 1)  # The sum of two six-sided dice
     position = (position + roll) %% 40     # starts back at 0 when you make it past "GO"
@@ -106,7 +107,7 @@ all_positions = map(1:n_players, ~simulate_player(turns_per_player)) %>% unlist(
 
 
 
-#Visualization
+#Visualization of the simulation
 #save the Count as landings and order them by which were landed on most out of 4 players having 1000 turns each
 landings = all_positions %>% count(position, name = "landed_on") %>% left_join(monopoly_board, by = "position") %>% arrange(desc(landed_on))  %>% mutate(label = paste(space, position), label = factor(label, levels = label[order(landed_on)]))
 
