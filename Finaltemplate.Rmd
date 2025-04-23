@@ -32,17 +32,92 @@ Buying/Landing on properties
 - When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
 ## Luke Olson
 
-```{r Student1}
+```{r, binwidth=8, binheight=8}
 #2. Let's Get Moving
 
 library(tidyverse)
 
-#Creating the board
-monopoly_board = tibble (position = 0:39, name = c("Go", "Mediterranean Avenue", "Community Chest 1", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance 1", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest 2", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance 2", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go to Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest 3", "Pennsylvania Avenue", "Short Line", "Chance 3", "Park Place", "Luxury Tax", "Boardwalk"))
 
-#settings for the simulation
+#Creating the board
+monopoly_board = tibble(position = 0:39, space = c("Go", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go to Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest", "Pennsylvania Avenue", "Short Line Railroad", "Chance", "Park Place", "Luxury Tax", "Boardwalk"))
+
+# Define color group by property (not included is Chance, Community Chest, Income Tax, Luxury Tax, Go, Go to Jail, and Jail/ Just Visiting)
+property_colors = tribble(~space,                    ~color_group,
+                          "Mediterranean Avenue",   "Brown",
+                          "Baltic Avenue",          "Brown",
+                          "Oriental Avenue",        "Light Blue",
+                          "Vermont Avenue",         "Light Blue",
+                          "Connecticut Avenue",     "Light Blue",
+                          "St. Charles Place",      "Pink",
+                          "States Avenue",          "Pink",
+                          "Virginia Avenue",        "Pink",
+                          "St. James Place",        "Orange",
+                          "Tennessee Avenue",       "Orange",
+                          "New York Avenue",        "Orange",
+                          "Kentucky Avenue",        "Red",
+                          "Indiana Avenue",         "Red",
+                          "Illinois Avenue",        "Red",
+                          "Atlantic Avenue",        "Yellow",
+                          "Ventnor Avenue",         "Yellow",
+                          "Marvin Gardens",         "Yellow",
+                          "Pacific Avenue",         "Green",
+                          "North Carolina Avenue",  "Green",
+                          "Pennsylvania Avenue",    "Green",
+                          "Park Place",             "Dark Blue",
+                          "Boardwalk",              "Dark Blue",
+                          "Reading Railroad",       "Black",
+                          "Pennsylvania Railroad",  "Black",
+                          "B&O Railroad",           "Black",
+                          "Short Line Railroad",    "Black",
+                          "Water Works",            "Purple",
+                          "Electric Company",       "Purple")
+
+
+
+# Join colors into board data
+monopoly_board = monopoly_board %>%
+  left_join(property_colors, by = "space") %>%
+  mutate(color_group = replace_na(color_group, "Other"))
+
+
+# Assign colors (exact Monopoly-themed colors)
+monopoly_colors = c("Brown" = "#8B4513", "Light Blue" = "#ADD8E6", "Pink" = "#FF69B4", "Orange" = "#FFA500", "Red" = "#FF0000", "Yellow" = "#FFD700", "Green" = "#008000", "Dark Blue" = "#00008B", "Black"= "black", "Purple" ="purple", "Other" = "grey")
+
+
+# Begin the movement around the board
+simulate_player = function(turns = 1000) {
+  position = 0
+  landed = integer(turns)
+  
+  for (i in 1:turns) {
+    roll = sample(1:6, 1) + sample(1:6, 1)  # The sum of two six-sided dice
+    position = (position + roll) %% 40     # starts back at 0 when you make it past "GO"
+    landed[i] <- position
+  }
+  return(landed)
+}
+
+
+# Include 4 players
+set.seed(25)  # Useful so others get the same output. Can put any number in here and will get varying outcomes. 
 n_players = 4
-n_turns = 500
+turns_per_player = 1000
+all_positions = map(1:n_players, ~simulate_player(turns_per_player)) %>% unlist() %>% as_tibble() %>% rename(position = value)
+
+
+
+#Visualization
+#save the Count as landings and order them by which were landed on most out of 4 players having 1000 turns each
+landings = all_positions %>% count(position, name = "landed_on") %>% left_join(monopoly_board, by = "position") %>% arrange(desc(landed_on))  %>% mutate(label = paste(space, position), label = factor(label, levels = label[order(landed_on)]))
+
+
+#Create the plot based on how frequently each space was landed on using the monopoly colors as well for an easier visualization. 
+ggplot(landings, aes(x = label, y = landed_on, fill = color_group)) +
+  geom_col() +
+  scale_fill_manual(values = monopoly_colors)+
+  coord_flip() +
+  labs(title = "Most Frequently Landed On Monopoly Spaces", x = "Board Space", y = "Number of Landings") +
+  theme_minimal(base_size = 10)
 
 
 ```
