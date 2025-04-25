@@ -613,8 +613,9 @@ ggplot(ownership_stats[ownership_stats$Type == "Property", ],
 
 
 
-## Landen Frye
+##
 
 ```{r student4}
-2+2
+6+6
+
 ```
