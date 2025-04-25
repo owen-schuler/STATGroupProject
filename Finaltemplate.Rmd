@@ -24,8 +24,481 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Caden Rummel
 
 ```{r student3}
+monopoly_board <- data.frame(
+  Position = 0:39,
+  Name = c(
+    "GO", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax", 
+    "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue", 
+    "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", 
+    "Pennsylvania Railroad", "St. James Place", "Community Chest", "Tennessee Avenue", "New York Avenue", 
+    "Free Parking", "Kentucky Avenue", "Chance", "Indiana Avenue", "Illinois Avenue", 
+    "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", 
+    "Go To Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest", "Pennsylvania Avenue", 
+    "Short Line", "Chance", "Park Place", "Luxury Tax", "Boardwalk"
+  ),
+  Type = c(
+    "Go", "Property", "Community Chest", "Property", "Tax",
+    "Railroad", "Property", "Chance", "Property", "Property",
+    "Jail", "Property", "Utility", "Property", "Property",
+    "Railroad", "Property", "Community Chest", "Property", "Property",
+    "Free Parking", "Property", "Chance", "Property", "Property",
+    "Railroad", "Property", "Property", "Utility", "Property",
+    "Go To Jail", "Property", "Property", "Community Chest", "Property",
+    "Railroad", "Chance", "Property", "Tax", "Property"
+  ),
+  stringsAsFactors = FALSE
+)
+simulate_basic <- function(players = 4, turns = 1000) {
+  positions <- rep(0, players)
+  visits <- rep(0, 40)
+  
+  for (turn in 1:turns) {
+    for (player in 1:players) {
+      move <- sum(sample(1:6, 2, replace = TRUE))
+      positions[player] <- (positions[player] + move) %% 40
+      visits[positions[player] + 1] <- visits[positions[player] + 1] + 1
+    }
+  }
+  
+  visits_df <- monopoly_board
+  visits_df$Visits <- visits
+  return(visits_df)
+}
 
+library(ggplot2)
+
+# Run and visualize
+basic_results <- simulate_basic()
+
+ggplot(basic_results, aes(x = reorder(Name, Position), y = Visits)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Basic Monopoly Movement (Dice Rolls Only)",
+       x = "Board Space", y = "Visits") +
+  theme(axis.text.x = element_text(angle = 90, size = 7), 
+        plot.title = element_text(hjust = 0.5))
+
+simulate_with_jail <- function(players = 4, turns = 1000) {
+  positions <- rep(0, players)
+  visits <- rep(0, 40)
+  in_jail <- rep(FALSE, players)
+  jail_turns <- rep(0, players)
+  
+  for (turn in 1:turns) {
+    for (player in 1:players) {
+      doubles_count <- 0
+      repeat {
+        if (in_jail[player]) {
+          jail_turns[player] <- jail_turns[player] + 1
+          roll <- sample(1:6, 2, replace = TRUE)
+          if (roll[1] == roll[2] || jail_turns[player] == 3) {
+            in_jail[player] <- FALSE
+            jail_turns[player] <- 0
+            move <- sum(roll)
+          } else {
+            break
+          }
+        } else {
+          roll <- sample(1:6, 2, replace = TRUE)
+          move <- sum(roll)
+          if (roll[1] == roll[2]) {
+            doubles_count <- doubles_count + 1
+          } else {
+            doubles_count <- 0
+          }
+          if (doubles_count == 3) {
+            positions[player] <- 10
+            in_jail[player] <- TRUE
+            jail_turns[player] <- 0
+            visits[11] <- visits[11] + 1
+            break
+          }
+        }
+
+        positions[player] <- (positions[player] + move) %% 40
+        pos <- positions[player] + 1
+        
+        if (monopoly_board$Type[pos] == "Go To Jail") {
+          positions[player] <- 10
+          in_jail[player] <- TRUE
+          jail_turns[player] <- 0
+          visits[11] <- visits[11] + 1
+        } else {
+          visits[pos] <- visits[pos] + 1
+        }
+
+        if (roll[1] != roll[2] || in_jail[player]) break
+      }
+    }
+  }
+  
+  visits_df <- monopoly_board
+  visits_df$Visits <- visits
+  return(visits_df)
+}
+
+# Run and visualize
+jail_results <- simulate_with_jail()
+
+ggplot(jail_results, aes(x = reorder(Name, Position), y = Visits)) +
+  geom_col(fill = "darkorange") +
+  labs(title = "Monopoly Movement with Jail + Doubles",
+       x = "Board Space", y = "Visits") +
+  theme(axis.text.x = element_text(angle = 90, size = 7), 
+        plot.title = element_text(hjust = 0.5))
+
+chance_movements <- c("GO" = 0, "Illinois Avenue" = 24, "St. Charles Place" = 11,
+                      "Boardwalk" = 39, "Jail" = 10, "Back 3 Spaces" = -3)
+
+draw_chance <- function(current_pos) {
+  card <- sample(names(chance_movements), 1)
+  if (card == "Back 3 Spaces") {
+    return((current_pos - 3) %% 40)
+  }
+  return(chance_movements[card])
+}
+
+simulate_with_chance <- function(players = 4, turns = 1000) {
+  positions <- rep(0, players)
+  visits <- rep(0, 40)
+  in_jail <- rep(FALSE, players)
+  jail_turns <- rep(0, players)
+
+  chance_spaces <- which(monopoly_board$Type == "Chance")
+  
+  for (turn in 1:turns) {
+    for (player in 1:players) {
+      doubles_count <- 0
+      repeat {
+        if (in_jail[player]) {
+          jail_turns[player] <- jail_turns[player] + 1
+          roll <- sample(1:6, 2, replace = TRUE)
+          if (roll[1] == roll[2] || jail_turns[player] == 3) {
+            in_jail[player] <- FALSE
+            jail_turns[player] <- 0
+            move <- sum(roll)
+          } else break
+        } else {
+          roll <- sample(1:6, 2, replace = TRUE)
+          move <- sum(roll)
+          if (roll[1] == roll[2]) {
+            doubles_count <- doubles_count + 1
+          } else {
+            doubles_count <- 0
+          }
+          if (doubles_count == 3) {
+            positions[player] <- 10
+            in_jail[player] <- TRUE
+            jail_turns[player] <- 0
+            visits[11] <- visits[11] + 1
+            break
+          }
+        }
+
+        positions[player] <- (positions[player] + move) %% 40
+        pos <- positions[player] + 1
+        
+        if (monopoly_board$Type[pos] == "Go To Jail") {
+          positions[player] <- 10
+          in_jail[player] <- TRUE
+          jail_turns[player] <- 0
+          visits[11] <- visits[11] + 1
+        } else if (pos %in% chance_spaces) {
+          new_pos <- draw_chance(positions[player])
+          positions[player] <- new_pos
+          visits[new_pos + 1] <- visits[new_pos + 1] + 1
+        } else {
+          visits[pos] <- visits[pos] + 1
+        }
+
+        if (roll[1] != roll[2] || in_jail[player]) break
+      }
+    }
+  }
+
+  visits_df <- monopoly_board
+  visits_df$Visits <- visits
+  return(visits_df)
+}
+
+# Run and visualize
+ggplot(chance_results, aes(x = reorder(Name, Position), y = Visits)) +
+  geom_col(fill = "purple") +
+  labs(title = "Monopoly Movement with Jail, Doubles, and Chance",
+       x = "Board Space", y = "Visits") +
+  theme(axis.text.x = element_text(angle = 90, size = 7),
+        plot.title = element_text(hjust = 0.5))
+
+summary_visits <- chance_results[order(-chance_results$Visits), c("Position", "Name", "Visits")]
+
+# Print summary
+print(summary_visits)
+library(dplyr)
+library(knitr)
+
+chance_results %>%
+  select(Position, Name, Visits) %>%
+  arrange(desc(Visits)) %>%
+  kable()
 ```
+
+```{r}
+players <- 4
+turns <- 1000
+total_player_turns <- players * turns
+
+# Add total + average visits to each board space
+chance_results <- chance_results %>%
+  mutate(AveragePerPlayerTurn = round(Visits / total_player_turns, 4))
+summary_table <- chance_results %>%
+  select(Position, Name, Visits, AveragePerPlayerTurn) %>%
+  arrange(desc(Visits))
+
+# Show as nice table (if in notebook or RMarkdown)
+library(knitr)
+kable(summary_table, digits = 4)
+ggplot(chance_results, aes(x = reorder(Name, Position), y = AveragePerPlayerTurn)) +
+  geom_col(fill = "darkgreen") +
+  geom_text(aes(label = round(AveragePerPlayerTurn, 4)), 
+            vjust = -0.3, size = 3, angle = 90) +
+  labs(title = "Average Visits per Player Turn (With Jail & Chance)",
+       x = "Board Space", y = "Avg Visits per Player Turn") +
+  theme(axis.text.x = element_text(angle = 90, size = 7),
+        plot.title = element_text(hjust = 0.5))
+```
+```{r}
+expected_visits <- rep(sum(chance_results$Visits) / 40, 40)  # Uniform expectation
+observed_visits <- chance_results$Visits
+
+# Run chi-squared test
+chisq_test <- chisq.test(x = observed_visits, p = rep(1/40, 40))
+
+# Output test results
+print(chisq_test)
+chance_results$Expected <- expected_visits
+chance_results$Deviation <- chance_results$Visits - expected_visits
+chance_results$StdResidual <- (chance_results$Visits - expected_visits) / sqrt(expected_visits)
+
+# Sort by standardized residuals
+chance_results %>%
+  arrange(desc(abs(StdResidual))) %>%
+  select(Name, Visits, Expected, Deviation, StdResidual) %>%
+  head(10) %>%
+  kable(digits = 2)
+```
+```{r}
+simulate_economy_game <- function(players = 4, max_turns = 200) {
+  set.seed(42)
+
+  positions <- rep(0, players)
+  money <- rep(1500, players)
+  eliminated <- rep(FALSE, players)
+  turns_alive <- rep(0, players)
+
+  log <- data.frame(Turn = integer(), Player = integer(), Action = character(), Money = numeric())
+
+  for (turn in 1:max_turns) {
+    for (player in 1:players) {
+      if (eliminated[player]) next
+
+      # Move the player
+      roll <- sum(sample(1:6, 2, replace = TRUE))
+      positions[player] <- (positions[player] + roll) %% 40
+      pos <- positions[player] + 1
+      space <- monopoly_board$Name[pos]
+      space_type <- monopoly_board$Type[pos]
+
+      # Handle money effects
+      change <- 0
+      action <- ""
+
+      if (space_type == "Tax") {
+        change <- -200
+        action <- "Paid tax"
+      } else if (space_type == "Go") {
+        change <- 200
+        action <- "Collected GO"
+      } else if (space_type == "Chance" || space_type == "Community Chest") {
+        # Random effect from card
+        card_value <- sample(c(-100, -50, 0, 50, 100, 200), 1)
+        change <- card_value
+        action <- ifelse(card_value >= 0, "Card gain", "Card loss")
+      } else if (space == "Go To Jail") {
+        positions[player] <- 10  # Send to Jail
+        action <- "Go to Jail"
+      } else {
+        action <- "Normal move"
+      }
+
+      money[player] <- money[player] + change
+      turns_alive[player] <- turns_alive[player] + 1
+
+      # Log this turn
+      log <- rbind(log, data.frame(
+        Turn = turn,
+        Player = player,
+        Action = paste(action, "-", space),
+        Money = money[player]
+      ))
+
+      # Eliminate if bankrupt
+      if (money[player] <= 0) {
+        eliminated[player] <- TRUE
+        log <- rbind(log, data.frame(
+          Turn = turn,
+          Player = player,
+          Action = "Bankrupt!",
+          Money = money[player]
+        ))
+      }
+    }
+
+    # Stop if only one player is left
+    if (sum(!eliminated) <= 1) break
+  }
+
+  return(list(log = log, final_money = money, eliminated = eliminated, turns = turns_alive))
+}
+
+result <- simulate_economy_game(players = 4, max_turns = 200)
+
+# Show log of actions
+head(result$log, 10)
+
+# Final Money and Elimination Status
+data.frame(
+  Player = 1:4,
+  Money = result$final_money,
+  Eliminated = result$eliminated,
+  TurnsSurvived = result$turns
+)
+
+library(ggplot2)
+
+ggplot(result$log, aes(x = Turn, y = Money, color = factor(Player))) +
+  geom_line(size = 1) +
+  labs(title = "Player Money Over Time",
+       x = "Turn", y = "Money ($)", color = "Player") +
+  theme_minimal()
+```
+
+```{r}
+set.seed(1)
+monopoly_board$Price <- ifelse(monopoly_board$Type == "Property", sample(100:400, 40, replace = TRUE), NA)
+monopoly_board$Rent <- ifelse(monopoly_board$Type == "Property", round(monopoly_board$Price * 0.1), NA)
+monopoly_board$Owner <- NA
+
+simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
+  positions <- rep(0, players)
+  money <- rep(1500, players)
+  eliminated <- rep(FALSE, players)
+  owned_properties <- replicate(players, integer(0), simplify = FALSE)
+  log <- data.frame()
+
+  monopoly_board$Owner <- NA  # reset ownership
+
+  for (turn in 1:max_turns) {
+    for (p in 1:players) {
+      if (eliminated[p]) next
+
+      roll <- sum(sample(1:6, 2, replace = TRUE))
+      positions[p] <- (positions[p] + roll) %% 40
+      pos <- positions[p] + 1
+      space <- monopoly_board[pos, ]
+
+      action <- "Moved"
+      change <- 0
+
+      if (space$Type == "Go To Jail") {
+        positions[p] <- 10
+        action <- "Sent to Jail"
+      } else if (space$Type == "Tax") {
+        change <- -200
+        action <- "Paid Tax"
+      } else if (space$Type == "Chance" || space$Type == "Community Chest") {
+        change <- sample(c(-100, -50, 0, 50, 100), 1)
+        action <- "Drew Card"
+      } else if (space$Type == "Property") {
+        if (is.na(space$Owner)) {
+          # Try to buy
+          if (money[p] >= space$Price) {
+            money[p] <- money[p] - space$Price
+            monopoly_board$Owner[pos] <- p
+            owned_properties[[p]] <- integer(0)
+monopoly_board$Owner[monopoly_board$Owner == p] <- NA
+            action <- paste("Bought", space$Name)
+          }
+        } else if (space$Owner != p) {
+          # Pay rent
+          rent <- space$Rent
+          money[p] <- money[p] - rent
+          owner_id <- space$Owner
+          if (!eliminated[owner_id]) {
+            money[owner_id] <- money[owner_id] + rent
+          }
+          action <- paste("Paid rent to P", owner_id)
+        }
+      }
+
+      # Log turn
+      log <- rbind(log, data.frame(Turn = turn, Player = p, Position = pos, Action = action, Money = money[p]))
+
+      # Check for bankruptcy
+      if (money[p] <= 0) {
+        eliminated[p] <- TRUE
+        monopoly_board$Owner[monopoly_board$Owner == p] <- NA  # properties go back to bank
+        owned_properties[[p]] <- c()
+        log <- rbind(log, data.frame(Turn = turn, Player = p, Position = pos, Action = "Bankrupt", Money = 0))
+      }
+
+      if (sum(!eliminated) == 1) break
+    }
+    if (sum(!eliminated) == 1) break
+  }
+
+remaining <- which(!eliminated)
+winner <- if (length(remaining) == 1) remaining else NA
+
+  return(list(
+    winner = winner,
+    owned_properties = owned_properties,
+    log = log
+  ))
+}
+
+simulate_multiple_games <- function(n = 100, players = 4) {
+  win_counts <- matrix(0, nrow = 40, ncol = 1)
+  colnames(win_counts) <- "WinsWithThisProperty"
+
+  for (i in 1:n) {
+    game <- simulate_game_with_ownership(players)
+    if (!is.na(game$winner)) {
+      props <- game$owned_properties[[game$winner]]
+      win_counts[props] <- win_counts[props] + 1
+    }
+  }
+
+  result <- monopoly_board
+  result$WinsWithThisProperty <- win_counts
+  result
+}
+```
+
+
+```{r}
+library(ggplot2)
+
+ownership_stats <- simulate_multiple_games(n = 200)
+
+ggplot(ownership_stats[ownership_stats$Type == "Property", ],
+       aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty)) +
+  geom_col(fill = "goldenrod") +
+  labs(title = "Which Properties Are Most Often Owned by Winners?",
+       x = "Property", y = "Games Won with Property Owned") +
+  theme(axis.text.x = element_text(angle = 90, size = 8),
+        plot.title = element_text(hjust = 0.5))
+```
+
+
 
 
 
