@@ -1,7 +1,8 @@
 ---
-title: "Super Awesome Project Template"
+title: "STAT 345 Final Project - Real Estate"
+author: "Landen Frye, Caden Rummel, Luke Olson, Owen Schuler"
 output: word_document
-date: "2025-04-11"
+date: "2025-05-16"
 ---
 
 ```{r setup, include=FALSE}
