@@ -601,19 +601,19 @@ simulate_multiple_games <- function(n = 200, players = 4) {
 # Run multiple simulations
 ownership_stats <- simulate_multiple_games(n = 200)
 
-# Check the ownership stats for debugging
-print(ownership_stats)
 
-# Plot the properties that are most often owned by winners
+
 library(ggplot2)
 
 ggplot(ownership_stats[ownership_stats$Type == "Property", ], 
-       aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty)) +
-  geom_col(fill = "goldenrod") +
+       aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty, fill = Name)) +
+  geom_col() +
+  scale_fill_discrete() +  # Let ggplot handle the color assignment automatically
   labs(title = "Which Properties Are Most Often Owned by Winners?",
        x = "Property", y = "Games Won with Property Owned") +
   theme(axis.text.x = element_text(angle = 90, size = 8),
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5),
+        legend.position = "none") 
 ```
 
 ```
