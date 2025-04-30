@@ -615,17 +615,3 @@ ggplot(ownership_stats[ownership_stats$Type == "Property", ],
         plot.title = element_text(hjust = 0.5),
         legend.position = "none") 
 ```
-
-<<<<<<< HEAD
-
-
-
-
-## Landen Frye
-
-```{r student4}
-#Free Parking
-
-
-```
-
