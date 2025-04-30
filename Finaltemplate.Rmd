@@ -1,8 +1,7 @@
 ---
-title: "STAT 345 Final Project - Real Estate"
-author: "Landen Frye, Caden Rummel, Luke Olson, Owen Schuler"
+title: "Super Awesome Project Template"
 output: word_document
-date: "2025-05-16"
+date: "2025-04-11"
 ---
 
 ```{r setup, include=FALSE}
@@ -493,6 +492,15 @@ ggplot(result$log, aes(x = Turn, y = Money, color = factor(Player))) +
   theme_minimal()
 ```
 
+
+
+## Landen Frye
+
+```{r student4}
+
+```
+
+
 ```{r}
 set.seed(1)
 monopoly_board$Price <- ifelse(monopoly_board$Type == "Property", sample(100:400, 40, replace = TRUE), NA)
@@ -503,7 +511,7 @@ simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
   positions <- rep(0, players)
   money <- rep(1500, players)
   eliminated <- rep(FALSE, players)
-  owned_properties <- replicate(players, integer(0), simplify = FALSE)
+  owned_properties <- vector("list", players)  # Initialize as a list of empty vectors
   log <- data.frame()
 
   monopoly_board$Owner <- NA  # reset ownership
@@ -531,16 +539,15 @@ simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
         action <- "Drew Card"
       } else if (space$Type == "Property") {
         if (is.na(space$Owner)) {
-          # Try to buy
+          # Try to buy property
           if (money[p] >= space$Price) {
             money[p] <- money[p] - space$Price
             monopoly_board$Owner[pos] <- p
-            owned_properties[[p]] <- integer(0)
-monopoly_board$Owner[monopoly_board$Owner == p] <- NA
+            owned_properties[[p]] <- c(owned_properties[[p]], pos)  # Update player's owned properties
             action <- paste("Bought", space$Name)
           }
         } else if (space$Owner != p) {
-          # Pay rent
+          # Pay rent if another player owns the property
           rent <- space$Rent
           money[p] <- money[p] - rent
           owner_id <- space$Owner
@@ -558,7 +565,7 @@ monopoly_board$Owner[monopoly_board$Owner == p] <- NA
       if (money[p] <= 0) {
         eliminated[p] <- TRUE
         monopoly_board$Owner[monopoly_board$Owner == p] <- NA  # properties go back to bank
-        owned_properties[[p]] <- c()
+        owned_properties[[p]] <- integer(0)  # Clear owned properties for eliminated player
         log <- rbind(log, data.frame(Turn = turn, Player = p, Position = pos, Action = "Bankrupt", Money = 0))
       }
 
@@ -567,8 +574,12 @@ monopoly_board$Owner[monopoly_board$Owner == p] <- NA
     if (sum(!eliminated) == 1) break
   }
 
-remaining <- which(!eliminated)
-winner <- if (length(remaining) == 1) remaining else NA
+  remaining <- which(!eliminated)
+  winner <- if (length(remaining) == 1) remaining else NA
+
+  # Debug: Check who won and their owned properties
+  cat("Winner:", winner, "\n")
+  cat("Owned properties by winner:", owned_properties[[winner]], "\n")
 
   return(list(
     winner = winner,
@@ -577,31 +588,38 @@ winner <- if (length(remaining) == 1) remaining else NA
   ))
 }
 
-simulate_multiple_games <- function(n = 100, players = 4) {
-  win_counts <- matrix(0, nrow = 40, ncol = 1)
+# Simulate multiple games
+simulate_multiple_games <- function(n = 200, players = 4) {
+  win_counts <- matrix(0, nrow = 40, ncol = 1)  # Track wins for each property
   colnames(win_counts) <- "WinsWithThisProperty"
 
+  # Run 'n' games
   for (i in 1:n) {
     game <- simulate_game_with_ownership(players)
     if (!is.na(game$winner)) {
+      # Get properties owned by the winner
       props <- game$owned_properties[[game$winner]]
-      win_counts[props] <- win_counts[props] + 1
+      if (length(props) > 0) {
+        win_counts[props] <- win_counts[props] + 1  # Increment win count for each owned property
+      }
     }
   }
 
   result <- monopoly_board
-  result$WinsWithThisProperty <- win_counts
-  result
+  result$WinsWithThisProperty <- win_counts  # Add the win count to monopoly_board data
+  return(result)
 }
-```
 
-
-```{r}
-library(ggplot2)
-
+# Run multiple simulations
 ownership_stats <- simulate_multiple_games(n = 200)
 
-ggplot(ownership_stats[ownership_stats$Type == "Property", ],
+# Check the ownership stats for debugging
+print(ownership_stats)
+
+# Plot the properties that are most often owned by winners
+library(ggplot2)
+
+ggplot(ownership_stats[ownership_stats$Type == "Property", ], 
        aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty)) +
   geom_col(fill = "goldenrod") +
   labs(title = "Which Properties Are Most Often Owned by Winners?",
@@ -610,12 +628,5 @@ ggplot(ownership_stats[ownership_stats$Type == "Property", ],
         plot.title = element_text(hjust = 0.5))
 ```
 
-
-
-
-
-## Landen Frye
-
-```{r student4}
-2+2
 ```
+
