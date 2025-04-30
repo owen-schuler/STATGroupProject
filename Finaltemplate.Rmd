@@ -39,7 +39,7 @@ library(tidyverse)
 
 
 #Creating the board
-monopoly_board2 = tibble(position = 0:39, space = c("Go", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go to Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest", "Pennsylvania Avenue", "Short Line Railroad", "Chance", "Park Place", "Luxury Tax", "Boardwalk"))
+monopoly_board = tibble(position = 0:39, space = c("Go", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go to Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest", "Pennsylvania Avenue", "Short Line Railroad", "Chance", "Park Place", "Luxury Tax", "Boardwalk"))
 
 # Define color group by property (not included is Chance, Community Chest, Income Tax, Luxury Tax, Go, Go to Jail, and Jail/ Just Visiting)
 property_colors = tribble(~space,                    ~color_group,
@@ -75,7 +75,7 @@ property_colors = tribble(~space,                    ~color_group,
 
 
 # Join colors into board data
-monopoly_board2 = monopoly_board2 %>%
+monopoly_board = monopoly_board %>%
   left_join(property_colors, by = "space") %>%
   mutate(color_group = replace_na(color_group, "Other"))
 
@@ -330,7 +330,7 @@ simulate_with_chance <- function(players = 4, turns = 1000) {
   visits_df$Visits <- visits
   return(visits_df)
 }
-
+chance_results <- simulate_with_chance()
 # Run and visualize
 ggplot(chance_results, aes(x = reorder(Name, Position), y = Visits)) +
   geom_col(fill = "purple") +
@@ -613,11 +613,8 @@ ggplot(ownership_stats[ownership_stats$Type == "Property", ],
 
 
 
-##
+## Landen Frye
 
 ```{r student4}
-6+6
-
-monopoly_board2
-monopoly_board
+2+2
 ```
