@@ -156,22 +156,24 @@ simulate_basic <- function(players = 4, turns = 1000) {
       move <- sum(sample(1:6, 2, replace = TRUE))
       positions[player] <- (positions[player] + move) %% 40
       visits[positions[player] + 1] <- visits[positions[player] + 1] + 1
-    }
+    }                      # +1 thing is needed because r doesnt like starting a vector at 0
   }
   
   visits_df <- monopoly_board
-  visits_df$Visits <- visits
+  visits_df$Visits <- visits #add this column to dataframe when function is ran
   return(visits_df)
 }
 
 library(ggplot2)
 
-# Run and visualize
+#Run 
 basic_results <- simulate_basic()
 
+
+#Visualize
 ggplot(basic_results, aes(x = reorder(Name, Position), y = Visits)) +
-  geom_col(fill = "steelblue") +
-  labs(title = "Basic Monopoly Movement (Dice Rolls Only)",
+  geom_col(fill = "blue") +
+  labs(title = "Monopoly Most Common Spaces Without Jail",
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7), 
         plot.title = element_text(hjust = 0.5))
@@ -231,7 +233,7 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
   }
   
   visits_df <- monopoly_board
-  visits_df$Visits <- visits
+  visits_df$Visits <- visits #same as above
   return(visits_df)
 }
 
@@ -239,8 +241,8 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
 jail_results <- simulate_with_jail()
 
 ggplot(jail_results, aes(x = reorder(Name, Position), y = Visits)) +
-  geom_col(fill = "darkorange") +
-  labs(title = "Monopoly Movement with Jail + Doubles",
+  geom_col(fill = "orange") +
+  labs(title = "Monopoly Most Common Spaces with Jail and Doubles",
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7), 
         plot.title = element_text(hjust = 0.5))
@@ -322,7 +324,7 @@ chance_results <- simulate_with_chance()
 # Run and visualize
 ggplot(chance_results, aes(x = reorder(Name, Position), y = Visits)) +
   geom_col(fill = "purple") +
-  labs(title = "Monopoly Movement with Jail, Doubles, and Chance",
+  labs(title = "Monopoly Most Common Spaces with Jail, Doubles, and Chance",
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7),
         plot.title = element_text(hjust = 0.5))
