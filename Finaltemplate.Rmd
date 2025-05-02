@@ -105,10 +105,10 @@ simulate_player = function(turns = 1000) {
 
 
 # Include 4 players
-set.seed(25)  # Useful so others get the same output. Can put any number in here and will get varying outcomes. 
-n_players = 4
+set.seed(25)  # Did this so the results are reproducible instead of being different every time the code is ran. Can put any number in here and will get varying outcomes. 
+number_players = 4
 turns_per_player = 1000
-all_positions = map(1:n_players, ~simulate_player(turns_per_player)) %>% unlist() %>% as_tibble() %>% rename(position = value)
+all_positions = map(1:number_players, ~simulate_player(turns_per_player)) %>% unlist() %>% as_tibble() %>% rename(position = value)
 
 
 
@@ -125,7 +125,7 @@ ggplot(landings, aes(x = label, y = landed_on, fill = color_group)) +
   labs(title = "Most Frequently Landed On Monopoly Spaces", x = "Board Space", y = "Number of Landings") +
   theme_minimal(base_size = 10)
 
-
+#problems with this, each chance has its different "position" instead of considering all chances to be one position. 
 ```
 
 
