@@ -339,7 +339,7 @@ library(knitr)
 chance_results %>%
   select(Position, Name, Visits) %>%
   arrange(desc(Visits)) %>%
-  kable()
+  kable() #got this from chatgpt
 ```
 
 ```{r}
