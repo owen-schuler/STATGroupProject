@@ -140,6 +140,8 @@ ggplot(landings, aes(x = label, y = landed_on, fill = color_group)) +
 
 
 ```{r student3}
+
+#Creates a data frame with the position, name and type of space
 monopoly_board <- data.frame(
   Position = 0:39,
   Name = c(
@@ -147,10 +149,15 @@ monopoly_board <- data.frame(
   Type = c(
     "Go", "Property", "Community Chest", "Property", "Tax", "Railroad", "Property", "Chance", "Property", "Property", "Jail", "Property", "Utility", "Property", "Property", "Railroad", "Property", "Community Chest", "Property", "Property", "Free Parking", "Property", "Chance", "Property", "Property", "Railroad", "Property", "Property", "Utility", "Property", "Go To Jail", "Property", "Property", "Community Chest", "Property", "Railroad", "Chance", "Property", "Tax", "Property"),
   stringsAsFactors = FALSE)
+
+#Basic simulation movement based only on dice rolls
 simulate_basic <- function(players = 4, turns = 1000) {
+#initializes player positions
   positions <- rep(0, players)
+#tracks how many times each space is visited
   visits <- rep(0, 40)
-  
+
+#rolls two dice and then moves the player while counting each visit
   for (turn in 1:turns) {
     for (player in 1:players) {
       move <- sum(sample(1:6, 2, replace = TRUE))
@@ -158,7 +165,8 @@ simulate_basic <- function(players = 4, turns = 1000) {
       visits[positions[player] + 1] <- visits[positions[player] + 1] + 1
     }                      # +1 thing is needed because r doesnt like starting a vector at 0
   }
-  
+
+#combines visit counts with board data
   visits_df <- monopoly_board
   visits_df$Visits <- visits #add this column to dataframe when function is ran
   return(visits_df)
@@ -166,22 +174,24 @@ simulate_basic <- function(players = 4, turns = 1000) {
 
 library(ggplot2)
 
-#Run 
+#plots the basic simulation
 basic_results <- simulate_basic()
 
 
-#Visualize
+#Visualization of it
 ggplot(basic_results, aes(x = reorder(Name, Position), y = Visits)) +
   geom_col(fill = "blue") +
   labs(title = "Monopoly Most Common Spaces Without Jail",
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7), 
         plot.title = element_text(hjust = 0.5))
-
+#simulations with jail and rolling doubles
 simulate_with_jail <- function(players = 4, turns = 1000) {
   positions <- rep(0, players)
   visits <- rep(0, 40)
+#track jail status
   in_jail <- rep(FALSE, players)
+#tracks turns spent in jail
   jail_turns <- rep(0, players)
   
   for (turn in 1:turns) {
@@ -192,6 +202,7 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
           jail_turns[player] <- jail_turns[player] + 1
           roll <- sample(1:6, 2, replace = TRUE)
           if (roll[1] == roll[2] || jail_turns[player] == 3) {
+            #Leave jail on doubles or after 3 turns
             in_jail[player] <- FALSE
             jail_turns[player] <- 0
             move <- sum(roll)
@@ -199,6 +210,8 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
             break
           }
         } else {
+
+        #Checks for doubles on rolls
           roll <- sample(1:6, 2, replace = TRUE)
           move <- sum(roll)
           if (roll[1] == roll[2]) {
@@ -206,6 +219,7 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
           } else {
             doubles_count <- 0
           }
+            #goes to jail after rolling 3 doubles
           if (doubles_count == 3) {
             positions[player] <- 10
             in_jail[player] <- TRUE
@@ -217,7 +231,8 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
 
         positions[player] <- (positions[player] + move) %% 40
         pos <- positions[player] + 1
-        
+
+        #Landed on "Go To Jail" and counts as well
         if (monopoly_board$Type[pos] == "Go To Jail") {
           positions[player] <- 10
           in_jail[player] <- TRUE
@@ -237,7 +252,7 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
   return(visits_df)
 }
 
-# Run and visualize
+#plots jail simulation
 jail_results <- simulate_with_jail()
 
 ggplot(jail_results, aes(x = reorder(Name, Position), y = Visits)) +
@@ -247,9 +262,11 @@ ggplot(jail_results, aes(x = reorder(Name, Position), y = Visits)) +
   theme(axis.text.x = element_text(angle = 90, size = 7), 
         plot.title = element_text(hjust = 0.5))
 
+#adds movement effect for Chance cards
 chance_movements <- c("GO" = 0, "Illinois Avenue" = 24, "St. Charles Place" = 11,
                       "Boardwalk" = 39, "Jail" = 10, "Back 3 Spaces" = -3)
 
+#function that randomly draws a Chance card and applies its movement effect
 draw_chance <- function(current_pos) {
   card <- sample(names(chance_movements), 1)
   if (card == "Back 3 Spaces") {
@@ -257,13 +274,13 @@ draw_chance <- function(current_pos) {
   }
   return(chance_movements[card])
 }
-
+#Simulation with jail, doubles, and Chance card effects
 simulate_with_chance <- function(players = 4, turns = 1000) {
   positions <- rep(0, players)
   visits <- rep(0, 40)
   in_jail <- rep(FALSE, players)
   jail_turns <- rep(0, players)
-
+#finds which spaces are "Chance"
   chance_spaces <- which(monopoly_board$Type == "Chance")
   
   for (turn in 1:turns) {
@@ -271,6 +288,7 @@ simulate_with_chance <- function(players = 4, turns = 1000) {
       doubles_count <- 0
       repeat {
         if (in_jail[player]) {
+        #uses the jail rules and applies it
           jail_turns[player] <- jail_turns[player] + 1
           roll <- sample(1:6, 2, replace = TRUE)
           if (roll[1] == roll[2] || jail_turns[player] == 3) {
@@ -279,6 +297,7 @@ simulate_with_chance <- function(players = 4, turns = 1000) {
             move <- sum(roll)
           } else break
         } else {
+            #normal movement
           roll <- sample(1:6, 2, replace = TRUE)
           move <- sum(roll)
           if (roll[1] == roll[2]) {
@@ -304,6 +323,7 @@ simulate_with_chance <- function(players = 4, turns = 1000) {
           jail_turns[player] <- 0
           visits[11] <- visits[11] + 1
         } else if (pos %in% chance_spaces) {
+            #Landed on a Chance space
           new_pos <- draw_chance(positions[player])
           positions[player] <- new_pos
           visits[new_pos + 1] <- visits[new_pos + 1] + 1
@@ -320,6 +340,8 @@ simulate_with_chance <- function(players = 4, turns = 1000) {
   visits_df$Visits <- visits
   return(visits_df)
 }
+
+#Plots full simulation with Chance cards incorporated
 chance_results <- simulate_with_chance()
 # Run and visualize
 ggplot(chance_results, aes(x = reorder(Name, Position), y = Visits)) +
@@ -329,13 +351,17 @@ ggplot(chance_results, aes(x = reorder(Name, Position), y = Visits)) +
   theme(axis.text.x = element_text(angle = 90, size = 7),
         plot.title = element_text(hjust = 0.5))
 
+#Creates a summary table sorted by the most visited
 summary_visits <- chance_results[order(-chance_results$Visits), c("Position", "Name", "Visits")]
 
 # Print summary
 print(summary_visits)
+
+#load necessary packages
 library(dplyr)
 library(knitr)
 
+#displays the summary table in a formatted sense and makes it visually easy to understand
 chance_results %>%
   select(Position, Name, Visits) %>%
   arrange(desc(Visits)) %>%
