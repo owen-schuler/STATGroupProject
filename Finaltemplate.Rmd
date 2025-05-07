@@ -394,8 +394,9 @@ summary_table <- chance_results %>%
 # Show as nice table (if in notebook or RMarkdown)
 library(knitr)
 kable(summary_table, digits = 4)
-ggplot(chance_results, aes(x = reorder(Name, Position), y = AveragePerPlayerTurn)) +
-  geom_col(fill = "darkgreen") +
+ggplot(chance_results, aes(x = reorder(Name, Position), y = AveragePerPlayerTurn, fill = Color)) +
+  geom_col() +
+  scale_fill_manual(values = monopoly_colors) +
   geom_text(aes(label = round(AveragePerPlayerTurn, 4)), 
             vjust = -0.3, size = 3, angle = 90) +
   labs(title = "Average Visits per Player Turn (With Jail & Chance)",
@@ -645,9 +646,9 @@ ownership_stats <- simulate_multiple_games(n = 200)
 library(ggplot2)
 
 ggplot(ownership_stats[ownership_stats$Type == "Property", ], 
-       aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty, fill = Name)) +
+       aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty, fill = Color)) +
   geom_col() +
-  scale_fill_discrete() +  # Let ggplot handle the color assignment automatically
+  scale_fill_manual(values = monopoly_colors) +
   labs(title = "Which Properties Are Most Often Owned by Winners?",
        x = "Property", y = "Games Won with Property Owned") +
   theme(axis.text.x = element_text(angle = 90, size = 8),
