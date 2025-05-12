@@ -29,9 +29,9 @@ knitr::opts_chunk$set(echo = TRUE)
     In jail movement
 - the player can roll doubles to get out of jail, use the "get out of jail free" card, or pay $50.
     Free Parking
-- All money that is paid to the bank goes to free parking. If a player lands on this space, they receive all money that the free parking "account" has collected. This is not initially done, it is done at the end to compare play length before and after.
+- All money that is paid to the bank goes to free parking. If a player lands on this space, they receive all money that the free parking "account" has collected. This is not initially done, it is done at the end to compare play length before and after. 
     Mortgages
-- Mortgages is not apart of this simulation as it was deemed to complicated, if a player runs out of money, the properties they own are now deemed free spaces.
+- Mortgages is not apart of this simulation as it was deemed to complicated, if a player runs out of money, the player that eliminated them gets the properties.
 
     Buying/Landing on properties
 - When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
@@ -141,23 +141,25 @@ ggplot(landings, aes(x = label, y = landed_on, fill = color_group)) +
 
 ```{r student3}
 
-#Creates a data frame with the position, name and type of space
+#Creates a data frame with the position, name, type of space, and corresponding color
 monopoly_board <- data.frame(
   Position = 0:39,
   Name = c(
     "GO", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go To Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest", "Pennsylvania Avenue", "Short Line", "Chance", "Park Place", "Luxury Tax", "Boardwalk"),
   Type = c(
     "Go", "Property", "Community Chest", "Property", "Tax", "Railroad", "Property", "Chance", "Property", "Property", "Jail", "Property", "Utility", "Property", "Property", "Railroad", "Property", "Community Chest", "Property", "Property", "Free Parking", "Property", "Chance", "Property", "Property", "Railroad", "Property", "Property", "Utility", "Property", "Go To Jail", "Property", "Property", "Community Chest", "Property", "Railroad", "Chance", "Property", "Tax", "Property"),
-  Color = c("Other", "Brown", "Other", "Brown", "Other", "Black", "Light Blue", "Other", "Light Blue", "Light Blue", "Other", "Pink", "Purple", "Pink", "Pink", "Black", "Orange", "Other", "Orange", "Orange", "Other", "Red", "Other", "Red", "Red", "Black", "Yellow", "Yellow", "Purple", "Yellow", "Other", "Green", "Green", "Other", "Green", "Black", "Other", "Dark Blue", "Other", "Dark Blue"),
+  Color = c(
+    "Other", "Brown", "Other", "Brown", "Other", "Black", "Light Blue", "Other", "Light Blue", "Light Blue", "Other", "Pink", "Purple", "Pink", "Pink", "Black", "Orange", "Other", "Orange", "Orange", "Other", "Red", "Other", "Red", "Red", "Black", "Yellow", "Yellow", "Purple", "Yellow", "Other", "Green", "Green", "Other", "Green", "Black", "Other", "Dark Blue", "Other", "Dark Blue"),
   stringsAsFactors = FALSE)
 
+#colors used for graphs later
 monopoly_colors = c("Brown" = "#8B4513", "Light Blue" = "#ADD8E6", "Pink" = "#FF69B4", "Orange" = "#FFA500", "Red" = "#FF0000", "Yellow" = "#FFD700", "Green" = "#008000", "Dark Blue" = "#00008B", "Black"= "black", "Purple" ="purple", "Other" = "grey")
 
 
 
 #Basic simulation movement based only on dice rolls
 simulate_basic <- function(players = 4, turns = 1000) {
-#initializes player positions
+#makes player positions
   positions <- rep(0, players)
 #tracks how many times each space is visited
   visits <- rep(0, 40)
@@ -173,7 +175,7 @@ simulate_basic <- function(players = 4, turns = 1000) {
 
 #combines visit counts with board data
   visits_df <- monopoly_board
-  visits_df$Visits <- visits #add this column to dataframe when function is ran
+  visits_df$Visits <- visits #adds this column to dataframe when function is ran
   return(visits_df)
 }
 
@@ -191,16 +193,17 @@ ggplot(basic_results, aes(x = reorder(Name, Position), y = Visits, fill = Color)
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7), 
         plot.title = element_text(hjust = 0.5))
+
 #simulations with jail and rolling doubles
 simulate_with_jail <- function(players = 4, turns = 1000) {
   positions <- rep(0, players)
   visits <- rep(0, 40)
-#track jail status
+#track jail status got this from chatgpt
   in_jail <- rep(FALSE, players)
 #tracks turns spent in jail
   jail_turns <- rep(0, players)
   
-  for (turn in 1:turns) {
+  for (turn in 1:turns) {  #had chat help with this too
     for (player in 1:players) {
       doubles_count <- 0
       repeat {
@@ -208,7 +211,7 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
           jail_turns[player] <- jail_turns[player] + 1
           roll <- sample(1:6, 2, replace = TRUE)
           if (roll[1] == roll[2] || jail_turns[player] == 3) {
-            #Leave jail on doubles or after 3 turns
+            #Leave jail if double is rolled or after 3 turns
             in_jail[player] <- FALSE
             jail_turns[player] <- 0
             move <- sum(roll)
@@ -219,8 +222,8 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
 
         #Checks for doubles on rolls
           roll <- sample(1:6, 2, replace = TRUE)
-          move <- sum(roll)
-          if (roll[1] == roll[2]) {
+          move <- sum(roll) #move across board based on sum of roll
+          if (roll[1] == roll[2]) { #consecutive double system
             doubles_count <- doubles_count + 1
           } else {
             doubles_count <- 0
@@ -230,23 +233,23 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
             positions[player] <- 10
             in_jail[player] <- TRUE
             jail_turns[player] <- 0
-            visits[11] <- visits[11] + 1
+            visits[11] <- visits[11] + 1 #counts 3 doubles in a row as a visit to jail
             break
           }
         }
 
         positions[player] <- (positions[player] + move) %% 40
-        pos <- positions[player] + 1
+        pos <- positions[player] + 1 
 
         #Landed on "Go To Jail" and counts as well
         if (monopoly_board$Type[pos] == "Go To Jail") {
-          visits[31] <- visits[31] + 1
+          visits[31] <- visits[31] + 1 #counts as go to jail visit
           positions[player] <- 10
           in_jail[player] <- TRUE
-          jail_turns[player] <- 0
-          visits[11] <- visits[11] + 1
+          jail_turns[player] <- 0 #starts jail_turns system
+          visits[11] <- visits[11] + 1 #counts as jail visit as well
         } else {
-          visits[pos] <- visits[pos] + 1
+          visits[pos] <- visits[pos] + 1 #if not go to jail, count as normal
         }
 
         if (roll[1] != roll[2] || in_jail[player]) break
@@ -260,7 +263,7 @@ simulate_with_jail <- function(players = 4, turns = 1000) {
 }
 
 #plots jail simulation
-jail_results <- simulate_with_jail()
+jail_results <- simulate_with_jail() 
 
 ggplot(jail_results, aes(x = reorder(Name, Position), y = Visits, fill = Color)) +
   geom_col() +
@@ -272,7 +275,8 @@ ggplot(jail_results, aes(x = reorder(Name, Position), y = Visits, fill = Color))
 
 #adds movement effect for Chance cards
 chance_movements <- c("GO" = 0, "Illinois Avenue" = 24, "St. Charles Place" = 11,
-                      "Boardwalk" = 39, "Jail" = 10, "Back 3 Spaces" = -3)
+                      "Boardwalk" = 39, "Jail" = 10, "Back 3 Spaces" = -3) 
+#all of the movement spaces from chance cards
 
 #function that randomly draws a Chance card and applies its movement effect
 draw_chance <- function(current_pos) {
@@ -297,8 +301,8 @@ simulate_with_chance <- function(players = 4, turns = 1000) {
       repeat {
         if (in_jail[player]) {
         #uses the jail rules and applies it
-          jail_turns[player] <- jail_turns[player] + 1
-          roll <- sample(1:6, 2, replace = TRUE)
+          jail_turns[player] <- jail_turns[player] + 1 
+          roll <- sample(1:6, 2, replace = TRUE) #explained above
           if (roll[1] == roll[2] || jail_turns[player] == 3) {
             in_jail[player] <- FALSE
             jail_turns[player] <- 0
@@ -391,7 +395,7 @@ summary_table <- chance_results %>%
   select(Position, Name, Visits, AveragePerPlayerTurn) %>%
   arrange(desc(Visits))
 
-# Show as nice table (if in notebook or RMarkdown)
+# Show as nice table
 library(knitr)
 kable(summary_table, digits = 4)
 ggplot(chance_results, aes(x = reorder(Name, Position), y = AveragePerPlayerTurn, fill = Color)) +
@@ -425,19 +429,20 @@ chance_results %>%
   kable(digits = 2)
 ```
 ```{r}
-simulate_economy_game <- function(players = 4, max_turns = 200) {
-  set.seed(42)
+#this is without buying properties and whatnot
+simulate_economy_game <- function(players = 4, max_turns = 4000) {
+  set.seed(420)
 
-  positions <- rep(0, players)
-  money <- rep(1500, players)
-  eliminated <- rep(FALSE, players)
-  turns_alive <- rep(0, players)
+  positions <- rep(0, players) #position system
+  money <- rep(1500, players) #1500 starting money amount
+  eliminated <- rep(FALSE, players) #stops having players in game if eliminated
+  turns_alive <- rep(0, players) #counts number of turns a player has played
 
   log <- data.frame(Turn = integer(), Player = integer(), Action = character(), Money = numeric())
 
   for (turn in 1:max_turns) {
     for (player in 1:players) {
-      if (eliminated[player]) next
+      if (eliminated[player]) next #if a player has been eliminated, go to next player
 
       # Move the player
       roll <- sum(sample(1:6, 2, replace = TRUE))
@@ -447,8 +452,8 @@ simulate_economy_game <- function(players = 4, max_turns = 200) {
       space_type <- monopoly_board$Type[pos]
 
       # Handle money effects
-      change <- 0
-      action <- ""
+      change <- 0 #amount of money a player gains or loses each turn, starts at 0 and changes based on what happened during the turn
+      action <- "" #gives an empty string to describe what the player did during the turn, such as paid tax, collected go, etc
 
       if (space_type == "Tax") {
         change <- -200
@@ -456,20 +461,20 @@ simulate_economy_game <- function(players = 4, max_turns = 200) {
       } else if (space_type == "Go") {
         change <- 200
         action <- "Collected GO"
-      } else if (space_type == "Chance" || space_type == "Community Chest") {
+      } else if (space_type == "Chance" || space_type == "Community Chest") { #space if chance or chest
         # Random effect from card
-        card_value <- sample(c(-100, -50, 0, 50, 100, 200), 1)
-        change <- card_value
-        action <- ifelse(card_value >= 0, "Card gain", "Card loss")
+        card_value <- sample(c(-100, -50, 0, 50, 100, 200), 1) #1 random value from those numbers
+        change <- card_value #either add 200, -100, etc to player money count
+        action <- ifelse(card_value >= 0, "Card gain", "Card loss") 
       } else if (space == "Go To Jail") {
         positions[player] <- 10  # Send to Jail
         action <- "Go to Jail"
       } else {
-        action <- "Normal move"
+        action <- "Normal move" 
       }
 
-      money[player] <- money[player] + change
-      turns_alive[player] <- turns_alive[player] + 1
+      money[player] <- money[player] + change #money count updates each turn
+      turns_alive[player] <- turns_alive[player] + 1 #adding 1 turn alive each turn
 
       # Log this turn
       log <- rbind(log, data.frame(
@@ -480,8 +485,8 @@ simulate_economy_game <- function(players = 4, max_turns = 200) {
       ))
 
       # Eliminate if bankrupt
-      if (money[player] <= 0) {
-        eliminated[player] <- TRUE
+      if (money[player] <= 0) { #if money is equal than or less than 0
+        eliminated[player] <- TRUE #elimates the player
         log <- rbind(log, data.frame(
           Turn = turn,
           Player = player,
@@ -496,9 +501,9 @@ simulate_economy_game <- function(players = 4, max_turns = 200) {
   }
 
   return(list(log = log, final_money = money, eliminated = eliminated, turns = turns_alive))
-}
+} #return stuff we need 
 
-result <- simulate_economy_game(players = 4, max_turns = 200)
+result <- simulate_economy_game(players = 4, max_turns = 4000)
 
 # Show log of actions
 head(result$log, 10)
@@ -515,34 +520,37 @@ library(ggplot2)
 
 ggplot(result$log, aes(x = Turn, y = Money, color = factor(Player))) +
   geom_line(size = 1) +
-  labs(title = "Player Money Over Time",
+  labs(title = "Player Money Over Time Without Property Ownership or Free Parking",
        x = "Turn", y = "Money ($)", color = "Player") +
   theme_minimal()
 ```
 
 
 
-## Landen Frye
-
-```{r student4}
-
-```
 
 
 ```{r}
 set.seed(1)
-monopoly_board$Price <- ifelse(monopoly_board$Type == "Property", sample(100:400, 40, replace = TRUE), NA)
-monopoly_board$Rent <- ifelse(monopoly_board$Type == "Property", round(monopoly_board$Price * 0.1), NA)
-monopoly_board$Owner <- NA
+
+#Prices and rent from monopoly spaces
+monopoly_board$Rent <- c(
+  NA, 2, NA, 4, NA, NA, 6, NA, 6, 8, NA, 10, NA, 10, 12, NA, 14, NA, 14, 16, NA, 18, NA, 18, 20, NA, 22, 22, NA, 24, NA, 26, 26, NA, 28, NA, NA, 35, NA, 50
+)
+
+monopoly_board$Price <- c(
+  NA, 60, NA, 60, NA, NA, 100, NA, 100, 120, NA, 140, NA, 140, 160, NA, 180, NA, 180, 200, NA, 220, NA, 220, 240, NA, 260, 260, NA, 280, NA, 300, 300, NA, 320, NA, NA, 350, NA, 400
+)
+monopoly_board$Owner <- NA #starts so that nobody owns any properties from the start
+
 
 simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
-  positions <- rep(0, players)
+  positions <- rep(0, players) #all explained above
   money <- rep(1500, players)
   eliminated <- rep(FALSE, players)
-  owned_properties <- vector("list", players)  # Initialize as a list of empty vectors
+  owned_properties <- vector("list", players)  #List of empty vectors
   log <- data.frame()
 
-  monopoly_board$Owner <- NA  # reset ownership
+  monopoly_board$Owner <- NA  # resets ownership
 
   for (turn in 1:max_turns) {
     for (p in 1:players) {
@@ -561,9 +569,11 @@ simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
         action <- "Sent to Jail"
       } else if (space$Type == "Tax") {
         change <- -200
+        money[p] <- money[p] + change #takes away money from player
         action <- "Paid Tax"
-      } else if (space$Type == "Chance" || space$Type == "Community Chest") {
+      } else if (space$Type == "Chance" || space$Type == "Community Chest") { #explained above
         change <- sample(c(-100, -50, 0, 50, 100), 1)
+        money[p] <- money[p] + change #takes away or adds money to players balance
         action <- "Drew Card"
       } else if (space$Type == "Property") {
         if (is.na(space$Owner)) {
@@ -572,7 +582,7 @@ simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
             money[p] <- money[p] - space$Price
             monopoly_board$Owner[pos] <- p
             owned_properties[[p]] <- c(owned_properties[[p]], pos)  # Update player's owned properties
-            action <- paste("Bought", space$Name)
+            action <- paste("Bought", space$Name) #action is bought x/y/z, etc
           }
         } else if (space$Owner != p) {
           # Pay rent if another player owns the property
@@ -604,10 +614,6 @@ simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
 
   remaining <- which(!eliminated)
   winner <- if (length(remaining) == 1) remaining else NA
-
-  # Debug: Check who won and their owned properties
-  cat("Winner:", winner, "\n")
-  cat("Owned properties by winner:", owned_properties[[winner]], "\n")
 
   return(list(
     winner = winner,
@@ -654,4 +660,146 @@ ggplot(ownership_stats[ownership_stats$Type == "Property", ],
   theme(axis.text.x = element_text(angle = 90, size = 8),
         plot.title = element_text(hjust = 0.5),
         legend.position = "none") 
+
+names(ownership_stats)[8] <- "WinsWithThisProperty" #changed the column name because there was an error in naming?
 ```
+
+## Landen Frye
+
+```{r free parking}
+set.seed(5)
+
+simulate_game_with_free_parking <- function(players = 4, max_turns = 500) {
+  free_parking <- 0 #free parking starts at 0
+  positions <- rep(0, players) #all explained above
+  money <- rep(1500, players)
+  eliminated <- rep(FALSE, players)
+  owned_properties <- vector("list", players)  #List of empty vectors
+  log <- data.frame()
+
+  monopoly_board$Owner <- NA  # resets ownership
+
+  for (turn in 1:max_turns) {
+    for (p in 1:players) {
+      if (eliminated[p]) next
+
+      roll <- sum(sample(1:6, 2, replace = TRUE))
+      positions[p] <- (positions[p] + roll) %% 40
+      pos <- positions[p] + 1
+      space <- monopoly_board[pos, ]
+      
+      if (pos == 21) {
+      money[p] <- money[p] + free_parking
+      action <- paste("Landed on Free Parking, collected", free_parking)
+      free_parking <- 0
+     }
+
+      action <- "Moved"
+      change <- 0
+
+      if (space$Type == "Go To Jail") {
+        positions[p] <- 10
+        action <- "Sent to Jail"
+      } else if (space$Type == "Tax") {
+        change <- -200
+        money[p] <- money[p] + change
+        free_parking <- free_parking - change  #have to do minus because change is already negative
+        action <- "Paid Tax"
+      } else if (space$Type == "Chance" || space$Type == "Community Chest") { #explained above
+        change <- sample(c(-100, -50, 0, 50, 100), 1)
+        money[p] <- money[p] + change
+        if (change < 0) { #if change is less than zero, then pay to free parking
+        free_parking <- free_parking - change  #add to Free Parking
+      }
+        action <- "Drew Card"
+      } else if (space$Type == "Property") {
+        if (is.na(space$Owner)) {
+          # Try to buy property
+          if (money[p] >= space$Price) {
+            money[p] <- money[p] - space$Price
+            monopoly_board$Owner[pos] <- p
+            owned_properties[[p]] <- c(owned_properties[[p]], pos)  # Update player's owned properties
+            action <- paste("Bought", space$Name) #action is bought x/y/z, etc
+          }
+        } else if (space$Owner != p) {
+          # Pay rent if another player owns the property
+          rent <- space$Rent
+          money[p] <- money[p] - rent
+          owner_id <- space$Owner
+          if (!eliminated[owner_id]) {
+            money[owner_id] <- money[owner_id] + rent
+          }
+          action <- paste("Paid rent to P", owner_id)
+        }
+      }
+
+      # Log turn
+      log <- rbind(log, data.frame(Turn = turn, Player = p, Position = pos, Action = action, Money = money[p]))
+
+      # Check for bankruptcy
+      if (money[p] <= 0) {
+        eliminated[p] <- TRUE
+        monopoly_board$Owner[monopoly_board$Owner == p] <- NA  # properties go back to bank
+        owned_properties[[p]] <- integer(0)  # Clear owned properties for eliminated player
+        log <- rbind(log, data.frame(Turn = turn, Player = p, Position = pos, Action = "Bankrupt", Money = 0))
+      }
+
+      if (sum(!eliminated) == 1) break
+    }
+    if (sum(!eliminated) == 1) break
+  }
+
+  remaining <- which(!eliminated)
+  winner <- if (length(remaining) == 1) remaining else NA
+
+  return(list(
+    winner = winner,
+    owned_properties = owned_properties,
+    log = log
+  ))
+}
+
+simulate_multiple_games <- function(n = 200, players = 4) {
+  win_counts <- matrix(0, nrow = 40, ncol = 1)  # Track wins for each property
+  colnames(win_counts) <- "WinsWithThisProperty"
+
+  for (i in 1:n) {
+    game <- simulate_game_with_free_parking(players)
+    if (!is.na(game$winner)) {
+      # Get properties owned by the winner
+      props <- game$owned_properties[[game$winner]]
+      if (length(props) > 0) {
+        win_counts[props] <- win_counts[props] + 1  # Increment win count for each owned property
+      }
+    }
+  }
+
+  result <- monopoly_board
+  result$WinsWithThisProperty <- win_counts  # Add the win count to monopoly_board data
+  return(result)
+}
+
+# Run multiple simulations
+ownership_stats <- simulate_multiple_games(n = 200)
+
+
+
+library(ggplot2)
+
+ggplot(ownership_stats[ownership_stats$Type == "Property", ], 
+       aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty, fill = Color)) +
+  geom_col() +
+  scale_fill_manual(values = monopoly_colors) +
+  labs(title = "Which Properties Are Most Often Owned by Winners With Free Parking?",
+       x = "Property", y = "Games Won with Property Owned") +
+  theme(axis.text.x = element_text(angle = 90, size = 8),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = "none") 
+
+names(ownership_stats)[8] <- "WinsWithThisProperty" #changed the column name because there was an error in naming?
+
+
+
+
+```
+
