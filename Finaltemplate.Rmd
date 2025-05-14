@@ -431,7 +431,7 @@ chance_results %>%
 ```{r}
 #this is without buying properties and whatnot
 simulate_economy_game <- function(players = 4, max_turns = 4000) {
-  set.seed(420)
+  set.seed(2)
 
   positions <- rep(0, players) #position system
   money <- rep(1500, players) #1500 starting money amount
