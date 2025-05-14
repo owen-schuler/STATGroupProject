@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
     Free Parking
 - All money that is paid to the bank goes to free parking. If a player lands on this space, they receive all money that the free parking "account" has collected. This is not initially done, it is done at the end to compare play length before and after. 
     Mortgages
-- Mortgages is not apart of this simulation as it was deemed to complicated, if a player runs out of money, the player that eliminated them gets the properties.
+- Mortgages are not a part of this simulation as it was deemed too complicated. If a player runs out of money, the player that eliminated them gets the properties.
 
     Buying/Landing on properties
 - When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
@@ -445,9 +445,6 @@ ggplot(result$log, aes(x = Turn, y = Money, color = factor(Player))) +
        x = "Turn", y = "Money ($)", color = "Player") +
   theme_minimal()
 ```
-
-
-
 
 
 ```{r}
