@@ -8,12 +8,6 @@ date: "2025-04-11"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-``` {r}
-if (old_position + roll >= 40) {
-       change <- 200
-       action <- "Passed GO"
-      } else
-```        
 
 1. Rules
     Starting Cash
