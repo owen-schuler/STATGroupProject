@@ -527,12 +527,6 @@ ggplot(result$log, aes(x = Turn, y = Money, color = factor(Player))) +
 
 
 ```{r}
-sim <- simulate_economy_game()
-```
-
-
-
-```{r}
 set.seed(1)
 
 #Prices and rent from monopoly spaces
