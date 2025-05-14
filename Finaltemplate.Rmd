@@ -504,6 +504,7 @@ simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
           }
           action <- paste("Paid rent to P", owner_id)
         }
+        
       }
 
       # Log turn
@@ -706,6 +707,25 @@ ggplot(ownership_stats_fp[ownership_stats_fp$Type == "Property", ],
         plot.title = element_text(hjust = 0.5),
         legend.position = "none") 
 
+
+```
+
+```{r}
+simulate_game_length <- function(n=200, players=4){
+  game_length <- matrix(0,nrow = n, ncol = 1)
+  colnames(game_length) <- "Length of Game"
+  
+  for (i in 1:n) {
+    game <- simulate_game_with_free_parking(players)
+    game_length[i] <- max(game$log$Turn)
+  }
+  return(game_length)
+}
+
+lengths <- as.numeric(simulate_game_length(n = 200))
+
+summary(lengths)
+hist(lengths, breaks = 20, col = "skyblue", main = "Distribution of Game Lengths", xlab = "Turns")
 
 ```
 
