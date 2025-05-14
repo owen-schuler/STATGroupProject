@@ -361,7 +361,6 @@ simulate_economy_game <- function(players = 4, max_turns = 4000) {
 
       # Move the player
       roll <- sum(sample(1:6, 2, replace = TRUE))
-      old_position <- positions[player]
       new_position <- (positions[player] + roll) %% 40
       positions[player] <- new_position
       pos <- new_position + 1
