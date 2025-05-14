@@ -486,10 +486,14 @@ simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
       if (space$Type == "Go To Jail") {
         positions[p] <- 10
         action <- "Sent to Jail"
-      } else if (space$Type == "Tax") {
+      } else if (space$Type == "Income Tax") {
         change <- -200
         money[p] <- money[p] + change #takes away money from player
-        action <- "Paid Tax"
+        action <- "Paid Income Tax"
+      } else if (space$Type == "Luxury Tax") {
+        change <- -100
+        money[p] <- money[p] + change #takes away money from player
+        action <- "Paid Luxury Tax"
       } else if (space$Type == "Chance" || space$Type == "Community Chest") { #explained above
         change <- sample(c(-100, -50, 0, 50, 100), 1)
         money[p] <- money[p] + change #takes away or adds money to players balance
@@ -620,11 +624,16 @@ simulate_game_with_free_parking <- function(players = 4, max_turns = 500) {
       if (space$Type == "Go To Jail") {
         positions[p] <- 10
         action <- "Sent to Jail"
-      } else if (space$Type == "Tax") {
+      } else if (space$Type == "Luxury Tax") {
+        change <- -100
+        money[p] <- money[p] + change
+        free_parking <- free_parking - change  #have to do minus because change is already negative
+        action <- "Paid Luxury Tax"
+      } else if (space$Type == "Income Tax") {
         change <- -200
         money[p] <- money[p] + change
         free_parking <- free_parking - change  #have to do minus because change is already negative
-        action <- "Paid Tax"
+        action <- "Paid Income Tax"
       } else if (space$Type == "Chance" || space$Type == "Community Chest") { #explained above
         change <- sample(c(-100, -50, 0, 50, 100), 1)
         money[p] <- money[p] + change
