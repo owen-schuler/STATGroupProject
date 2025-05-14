@@ -702,10 +702,6 @@ simulate_multiple_games_fp <- function(n = 200, players = 4) {
 # Run multiple simulations
 ownership_stats_fp <- simulate_multiple_games_fp(n = 200)
 
-
-
-library(ggplot2)
-
 ggplot(ownership_stats_fp[ownership_stats_fp$Type == "Property", ], 
        aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty, fill = Color)) +
   geom_col() +
