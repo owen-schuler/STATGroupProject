@@ -8,6 +8,12 @@ date: "2025-04-11"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+``` {r}
+if (old_position + roll >= 40) {
+       change <- 200
+       action <- "Passed GO"
+      } else
+```        
 
 1. Rules
     Starting Cash
@@ -60,7 +66,7 @@ monopoly_board <- data.frame(
   Name = c(
     "GO", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax", "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue", "Jail / Just Visiting", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad", "St. James Place", "Community Chest", "Tennessee Avenue", "New York Avenue", "Free Parking", "Kentucky Avenue", "Chance", "Indiana Avenue", "Illinois Avenue", "B&O Railroad", "Atlantic Avenue", "Ventnor Avenue", "Water Works", "Marvin Gardens", "Go To Jail", "Pacific Avenue", "North Carolina Avenue", "Community Chest", "Pennsylvania Avenue", "Short Line", "Chance", "Park Place", "Luxury Tax", "Boardwalk"),
   Type = c(
-    "Go", "Property", "Community Chest", "Property", "Tax", "Railroad", "Property", "Chance", "Property", "Property", "Jail", "Property", "Utility", "Property", "Property", "Railroad", "Property", "Community Chest", "Property", "Property", "Free Parking", "Property", "Chance", "Property", "Property", "Railroad", "Property", "Property", "Utility", "Property", "Go To Jail", "Property", "Property", "Community Chest", "Property", "Railroad", "Chance", "Property", "Tax", "Property"),
+    "Go", "Property", "Community Chest", "Property", "Income Tax", "Railroad", "Property", "Chance", "Property", "Property", "Jail", "Property", "Utility", "Property", "Property", "Railroad", "Property", "Community Chest", "Property", "Property", "Free Parking", "Property", "Chance", "Property", "Property", "Railroad", "Property", "Property", "Utility", "Property", "Go To Jail", "Property", "Property", "Community Chest", "Property", "Railroad", "Chance", "Property", "Luxury Tax", "Property"),
   Color = c(
     "Other", "Brown", "Other", "Brown", "Other", "Black", "Light Blue", "Other", "Light Blue", "Light Blue", "Other", "Pink", "Purple", "Pink", "Pink", "Black", "Orange", "Other", "Orange", "Orange", "Other", "Red", "Other", "Red", "Red", "Black", "Yellow", "Yellow", "Purple", "Yellow", "Other", "Green", "Green", "Other", "Green", "Black", "Other", "Dark Blue", "Other", "Dark Blue"),
   stringsAsFactors = FALSE)
@@ -341,6 +347,7 @@ chance_results %>%
   head(10) %>%
   kable(digits = 2)
 ```
+
 ```{r}
 #this is without buying properties and whatnot
 simulate_economy_game <- function(players = 4, max_turns = 4000) {
@@ -359,21 +366,28 @@ simulate_economy_game <- function(players = 4, max_turns = 4000) {
 
       # Move the player
       roll <- sum(sample(1:6, 2, replace = TRUE))
-      positions[player] <- (positions[player] + roll) %% 40
-      pos <- positions[player] + 1
+      old_position <- positions[player]
+      new_position <- (positions[player] + roll) %% 40
+      positions[player] <- new_position
+      pos <- new_position + 1
       space <- monopoly_board$Name[pos]
       space_type <- monopoly_board$Type[pos]
-
+      
+      
+     
+       action <- "" #gives an empty string to describe what the player did during the turn, such as paid tax, collected go, etc
+       
       # Handle money effects
       change <- 0 #amount of money a player gains or loses each turn, starts at 0 and changes based on what happened during the turn
-      action <- "" #gives an empty string to describe what the player did during the turn, such as paid tax, collected go, etc
-
-      if (space_type == "Tax") {
-        change <- -200
-        action <- "Paid tax"
+       if (space_type == "Luxury Tax") {
+       change <- -100
+       action <- "Paid Luxury Tax"
       } else if (space_type == "Go") {
-        change <- 200
-        action <- "Collected GO"
+       change <- 200
+       action <- "Passed GO"
+      } else if (space_type == "Income Tax") {
+       change <- -200
+       action <- "Paid Income Tax"
       } else if (space_type == "Chance" || space_type == "Community Chest") { #space if chance or chest
         # Random effect from card
         card_value <- sample(c(-100, -50, 0, 50, 100, 200), 1) #1 random value from those numbers
@@ -419,7 +433,7 @@ simulate_economy_game <- function(players = 4, max_turns = 4000) {
 result <- simulate_economy_game(players = 4, max_turns = 4000)
 
 # Show log of actions
-head(result$log, 10)
+head(result$log, 100) #used this to make sure that money was actually going up/down
 
 # Final Money and Elimination Status
 data.frame(
