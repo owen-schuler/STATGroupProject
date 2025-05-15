@@ -592,7 +592,7 @@ names(ownership_stats)[8] <- "WinsWithThisProperty" #changed the column name bec
 ```{r free parking}
 set.seed(5)
 
-simulate_game_with_free_parking <- function(players = 4, max_turns = 500) {
+simulate_game_with_free_parking <- function(players = 4, max_turns = 1000) {
   free_parking <- 0 #free parking starts at 0
   positions <- rep(0, players) #all explained above
   money <- rep(1500, players)
@@ -735,10 +735,133 @@ simulate_game_length <- function(n=200, players=4){
   return(game_length)
 }
 
-lengths <- as.numeric(simulate_game_length(n = 200))
+lengths <- as.numeric(simulate_game_length(n = 500))
 
 summary(lengths)
-hist(lengths, breaks = 20, col = "skyblue", main = "Distribution of Game Lengths", xlab = "Turns")
 
+df <- data.frame(values = lengths)
+
+ggplot(df, aes(x=values))+
+  geom_histogram(bins=50)
+```
+```{r}
+set.seed(5)
+
+simulate_game_no_bank <- function(players = 4, max_turns =1000) {
+  free_parking <- 0 #free parking starts at 0
+  positions <- rep(0, players) #all explained above
+  money <- rep(1500, players)
+  eliminated <- rep(FALSE, players)
+  owned_properties <- vector("list", players)  #List of empty vectors
+  log <- data.frame()
+
+  monopoly_board$Owner <- NA  # resets ownership
+
+  for (turn in 1:max_turns) {
+    for (p in 1:players) {
+      if (eliminated[p]) next
+
+      roll <- sum(sample(1:6, 2, replace = TRUE))
+      positions[p] <- (positions[p] + roll) %% 40
+      pos <- positions[p] + 1
+      space <- monopoly_board[pos, ]
+      
+      if (pos == 21) {
+      money[p] <- money[p] + free_parking
+      action <- paste("Landed on Free Parking, collected", free_parking)
+      free_parking <- 0
+     }
+
+      action <- "Moved"
+      change <- 0
+
+      if (space$Type == "Go To Jail") {
+        positions[p] <- 10
+        action <- "Sent to Jail"
+      } else if (space$Type == "Luxury Tax") {
+        change <- -100
+        money[p] <- money[p] + change
+        free_parking <- free_parking - change  #have to do minus because change is already negative
+        action <- "Paid Luxury Tax"
+      } else if (space$Type == "Income Tax") {
+        change <- -200
+        money[p] <- money[p] + change
+        free_parking <- free_parking - change  #have to do minus because change is already negative
+        action <- "Paid Income Tax"
+      } else if (space$Type == "Chance" || space$Type == "Community Chest") { #explained above
+        change <- sample(c(-100, -50, 0, 50, 100), 1)
+        money[p] <- money[p] + change
+        if (change < 0) { #if change is less than zero, then pay to free parking
+        free_parking <- free_parking - change  #add to Free Parking
+      }
+        action <- "Drew Card"
+      } else if (space$Type == "Property") {
+        if (is.na(space$Owner)) {
+          # Try to buy property
+          if (money[p] >= space$Price) {
+            money[p] <- money[p] - space$Price
+            free_parking <- free_parking + space$Price
+            monopoly_board$Owner[pos] <- p
+            owned_properties[[p]] <- c(owned_properties[[p]], pos)  # Update player's owned properties
+            action <- paste("Bought", space$Name) #action is bought x/y/z, etc
+          }
+        } else if (space$Owner != p) {
+          # Pay rent if another player owns the property
+          rent <- space$Rent
+          money[p] <- money[p] - rent
+          owner_id <- space$Owner
+          if (!eliminated[owner_id]) {
+            money[owner_id] <- money[owner_id] + rent
+          }
+          action <- paste("Paid rent to P", owner_id)
+        }
+      }
+
+      # Log turn
+      log <- rbind(log, data.frame(Turn = turn, Player = p, Position = pos, Action = action, Money = money[p]))
+
+      # Check for bankruptcy
+      if (money[p] <= 0) {
+        eliminated[p] <- TRUE
+        monopoly_board$Owner[monopoly_board$Owner == p] <- NA  # properties go back to bank
+        owned_properties[[p]] <- integer(0)  # Clear owned properties for eliminated player
+        log <- rbind(log, data.frame(Turn = turn, Player = p, Position = pos, Action = "Bankrupt", Money = 0))
+      }
+
+      if (sum(!eliminated) == 1) break
+    }
+    if (sum(!eliminated) == 1) break
+  }
+
+  remaining <- which(!eliminated)
+  winner <- if (length(remaining) == 1) remaining else NA
+
+  return(list(
+    winner = winner,
+    owned_properties = owned_properties,
+    log = log
+  ))
+}
+
+
+simulate_game_length_no_bank <- function(n=200, players=4){
+  game_length <- matrix(0,nrow = n, ncol = 1)
+  colnames(game_length) <- "Length of Game"
+  
+  for (i in 1:n) {
+    game <- simulate_game_no_bank(players)
+    game_length[i] <- max(game$log$Turn)
+  }
+  return(game_length)
+}
+
+lengths_no_bank <- as.numeric(simulate_game_length_no_bank(n = 300))
+
+summary(lengths_no_bank)
+
+df_no_bank <- data.frame(values = lengths_no_bank)
+
+ggplot(df_no_bank, aes(x=values))+
+  geom_histogram(bins=100)
 ```
 
