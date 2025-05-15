@@ -855,7 +855,7 @@ simulate_game_length_no_bank <- function(n=200, players=4){
   return(game_length)
 }
 
-lengths_no_bank <- as.numeric(simulate_game_length_no_bank(n = 300))
+lengths_no_bank <- as.numeric(simulate_game_length_no_bank(n = 100))
 
 summary(lengths_no_bank)
 
