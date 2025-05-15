@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = TRUE)
 - When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
 ## Luke Olson
 
-```{r, binwidth=8, binheight=8}
+```{r}
 
 ```
 
@@ -407,7 +407,7 @@ simulate_economy_game <- function(players = 4, max_turns = 4000) {
 
       # Eliminate if bankrupt
       if (money[player] <= 0) { #if money is equal than or less than 0
-        eliminated[player] <- TRUE #elimates the player
+        eliminated[player] <- TRUE #eliminates the player
         log <- rbind(log, data.frame(
           Turn = turn,
           Player = player,
@@ -451,13 +451,9 @@ ggplot(result$log, aes(x = Turn, y = Money, color = factor(Player))) +
 set.seed(1)
 
 #Prices and rent from monopoly spaces
-monopoly_board$Rent <- c(
-  NA, 2, NA, 4, NA, NA, 6, NA, 6, 8, NA, 10, NA, 10, 12, NA, 14, NA, 14, 16, NA, 18, NA, 18, 20, NA, 22, 22, NA, 24, NA, 26, 26, NA, 28, NA, NA, 35, NA, 50
-)
+monopoly_board$Rent <- c(NA, 2, NA, 4, NA, NA, 6, NA, 6, 8, NA, 10, NA, 10, 12, NA, 14, NA, 14, 16, NA, 18, NA, 18, 20, NA, 22, 22, NA, 24, NA, 26, 26, NA, 28, NA, NA, 35, NA, 50)
 
-monopoly_board$Price <- c(
-  NA, 60, NA, 60, NA, NA, 100, NA, 100, 120, NA, 140, NA, 140, 160, NA, 180, NA, 180, 200, NA, 220, NA, 220, 240, NA, 260, 260, NA, 280, NA, 300, 300, NA, 320, NA, NA, 350, NA, 400
-)
+monopoly_board$Price <- c( NA, 60, NA, 60, NA, NA, 100, NA, 100, 120, NA, 140, NA, 140, 160, NA, 180, NA, 180, 200, NA, 220, NA, 220, 240, NA, 260, 260, NA, 280, NA, 300, 300, NA, 320, NA, NA, 350, NA, 400)
 monopoly_board$Owner <- NA #starts so that nobody owns any properties from the start
 
 #Playing monopoly while buying property, but no free parking yet
