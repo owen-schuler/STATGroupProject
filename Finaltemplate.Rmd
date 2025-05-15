@@ -376,7 +376,7 @@ simulate_economy_game <- function(players = 4, max_turns = 4000) {
        if (space_type == "Luxury Tax") {
        change <- -100
        action <- "Paid Luxury Tax"
-      } else if (space_type == "Go") {
+      } else if (space_type == "Go") { #Made it so that you only got money if you landed on go in an effort to control the money in the game, otherwise there was no chance to feasibly lose enough money so that a player would get eliminated, but even with this, it is unlikeley that a game will ever end.
        change <- 200
        action <- "Passed GO"
       } else if (space_type == "Income Tax") {
@@ -455,6 +455,8 @@ monopoly_board$Rent <- c(NA, 2, NA, 4, NA, NA, 6, NA, 6, 8, NA, 10, NA, 10, 12, 
 
 monopoly_board$Price <- c( NA, 60, NA, 60, NA, NA, 100, NA, 100, 120, NA, 140, NA, 140, 160, NA, 180, NA, 180, 200, NA, 220, NA, 220, 240, NA, 260, 260, NA, 280, NA, 300, 300, NA, 320, NA, NA, 350, NA, 400)
 monopoly_board$Owner <- NA #starts so that nobody owns any properties from the start
+
+#HAD TO REMOVE GETTING PAID FROM GO FEATURE, OTHERWISE PLAYERS WOULD NOT GET ELIMINATED
 
 #Playing monopoly while buying property, but no free parking yet
 simulate_game_with_ownership <- function(players = 4, max_turns = 500) {
@@ -587,6 +589,8 @@ names(ownership_stats)[8] <- "WinsWithThisProperty" #changed the column name bec
 
 ```{r free parking}
 set.seed(5)
+
+#HAD TO REMOVE GETTING PAID FROM GO FEATURE, OTHERWISE PLAYERS WOULD NOT GET ELIMINATED
 
 simulate_game_with_free_parking <- function(players = 4, max_turns = 1000) {
   free_parking <- 0 #free parking starts at 0
