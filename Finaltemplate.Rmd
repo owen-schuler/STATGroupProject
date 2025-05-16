@@ -740,7 +740,7 @@ The top 5 properties that are most owned by winners in highest to lowest are Ten
 
 
 
-How long do games typically last given your starting board and money level? How does this change if money paid to the bank is placed in "Free Parking" and awarded to players landing on that space?
+5. How long do games typically last given your starting board and money level? How does this change if money paid to the bank is placed in "Free Parking" and awarded to players landing on that space?
 ```{r Game Length 1, echo=FALSE}
 set.seed(5)
 
