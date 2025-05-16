@@ -585,7 +585,7 @@ ggplot(ownership_stats[ownership_stats$Type == "Property", ],
        aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty, fill = Color)) +
   geom_col() +
   scale_fill_manual(values = monopoly_colors) +
-  labs(title = "Properties Most Often Owned by Winners?",
+  labs(title = "Properties Owned by Winners",
        x = "Property", y = "Games Won with Property Owned") +
   theme(axis.text.x = element_text(angle = 90, size = 8),
         plot.title = element_text(hjust = 0.5),
@@ -725,7 +725,7 @@ ggplot(ownership_stats_fp[ownership_stats_fp$Type == "Property", ],
        aes(x = reorder(Name, -WinsWithThisProperty), y = WinsWithThisProperty, fill = Color)) +
   geom_col() +
   scale_fill_manual(values = monopoly_colors) +
-  labs(title = "Properties Most Often Owned by Winners With Free Parking",
+  labs(title = "Properties Owned by Winners With Free Parking",
        x = "Property", y = "Games Won with Property Owned") +
   theme(axis.text.x = element_text(angle = 90, size = 8),
         plot.title = element_text(hjust = 0.5),
@@ -740,7 +740,7 @@ The top 5 properties that are most owned by winners in highest to lowest are Ten
 
 
 
-
+How long do games typically last given your starting board and money level? How does this change if money paid to the bank is placed in "Free Parking" and awarded to players landing on that space?
 ```{r Game Length 1, echo=FALSE}
 set.seed(5)
 
