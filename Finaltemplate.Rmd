@@ -41,7 +41,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 2. Which properties are landed on most frequently?
-```{r, echo=FALSE}
+```{r Getting Started, echo=FALSE}
 
 #Creates a data frame with the position, name, type of space, and corresponding color
 monopoly_board <- data.frame(
@@ -103,7 +103,7 @@ From a sample of 4 players each having 1000 turns, we found that without any rul
 
 
 3. Improve your system to incorporate going to jail, including the doubles-rolling condition. Which properties are landed on most frequently now?
-```{r, echo=FALSE}
+```{r Jail and Doubles, echo=FALSE}
 #simulations with jail and rolling doubles
 simulate_with_jail <- function(players = 4, turns = 1000) {
   positions <- rep(0, players)
@@ -190,7 +190,7 @@ From a sample of 4 players each having 1000 turns, there is only a significant d
 
 
 4. Incorporate the movement cards into your system. You can ignore the effects of non-movement cards, but not their existence! Which properties are landed on most frequently now?
-```{r, echo=FALSE}
+```{r Adding Chance, echo=FALSE}
 #adds movement effect for Chance cards
 chance_movements <- c("GO" = 0, "Illinois Avenue" = 24, "St. Charles Place" = 11,
                       "Boardwalk" = 39, "Jail" = 10, "Back 3 Spaces" = -3) 
@@ -296,8 +296,7 @@ Analysis for monopoly most common spaces with jail, doubles, and chance:
 From a sample of 4 players each having 1000 turns while including jail and double rules along with chance cards, we found that there is only a noticeable difference in amount landed in the jail space and the places chance moves a player to.  The reason the jail space is higher is because of the “Go to Jail” space that automatically brings the player to the jail space along with the chance card that brings a player there, and because of the time spent in jail trying to roll to get out. The reason random spaces throughout the board are higher is due to the chance card bringing them there. If you look you will notice that GO, Illinois Avenue, St. Charles Place, and Boardwalk are the highest four excluding the jail, chance, and community chest spaces. This is due to the chance card having a chance of bringing a player to one of those spots, making it higher than most other spaces. A nuance made because of the jail space is seen 7-9 spaces after the jail space, where there is a slight uptick in the number of times landed. Because of the times landed on jail, it only makes sense that the spaces with an average two dice roll distance from jail should also see an increase in times landed on compared to the other spaces on the board.  
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
-#decided that pasting this in the final report wasnt necessary, but still left it in the rmd if you wanted to look at it
+```{r Extra Graph, echo=FALSE, message=FALSE, warning=FALSE}
 
 library(dplyr)
 library(knitr)
@@ -327,7 +326,7 @@ ggplot(chance_results, aes(x = reorder(Name, Position), y = AveragePerPlayerTurn
         plot.title = element_text(hjust = 0.5))
 ```
 
-```{r, echo=FALSE, eval=FALSE}
+```{r Chi Squared Test, echo=FALSE}
 expected_visits <- rep(sum(chance_results$Visits) / 40, 40)  # Uniform expectation
 observed_visits <- chance_results$Visits
 
@@ -348,7 +347,7 @@ chance_results %>%
   # kable(digits = 2)
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r General Economy, echo=FALSE, message=FALSE, warning=FALSE}
 #this is without buying properties and whatnot
 simulate_economy_game <- function(players = 4, max_turns = 4000) {
   set.seed(2)
@@ -432,7 +431,7 @@ simulate_economy_game <- function(players = 4, max_turns = 4000) {
 result <- simulate_economy_game(players = 4, max_turns = 4000)
 
 # Show log of actions
-head(result$log, 100) #used this to make sure that money was actually going up/down
+head(result$log, 10) #used this to make sure that money was actually going up/down
 
 # Final Money and Elimination Status
 data.frame(
@@ -457,7 +456,7 @@ In this game, we observed the performance of four players across 4000 turns. We 
 
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Actual Economy, echo=FALSE, message=FALSE, warning=FALSE}
 set.seed(1)
 
 #Prices and rent from monopoly spaces
@@ -599,7 +598,7 @@ Which properties are most often owned by winners without free parking?
 
 The top 5 properties that are most owned by winners in highest to lowest are St. Charles Place, States Avenue, Vermont Avenue, Connecticut Avenue, and Tennessee Avenue all game won a little bit over 60. The 5 lowest properties from highest to lowest are Boardwalk, Indiana Avenue, North Carolina Avenue, Park Place, and Pennsylvania Avenue.  From this data we suggest owning the first 5 properties listed to have the best chance of winning the game of monopoly when free parking is not involved. 
 
-```{r free parking, echo=FALSE}
+```{r Free Parking, echo=FALSE}
 set.seed(5)
 
 #HAD TO REMOVE GETTING PAID FROM GO FEATURE, OTHERWISE PLAYERS WOULD NOT GET ELIMINATED
@@ -742,7 +741,7 @@ The top 5 properties that are most owned by winners in highest to lowest are Ten
 
 
 
-```{r, echo=FALSE}
+```{r Game Length 1, echo=FALSE}
 set.seed(5)
 
 simulate_game_length <- function(n=200, players=4){
@@ -766,7 +765,7 @@ ggplot(df, aes(x=values))+
   geom_histogram(bins=50)
 ```
 
-```{r, echo=FALSE}
+```{r Game Length 2, echo=FALSE}
 set.seed(5)
 
 simulate_game_no_bank <- function(players = 4, max_turns =1000) {
