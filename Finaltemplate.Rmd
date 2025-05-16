@@ -296,7 +296,7 @@ Analysis for monopoly most common spaces with jail, doubles, and chance:
 From a sample of 4 players each having 1000 turns while including jail and double rules along with chance cards, we found that there is only a noticeable difference in amount landed in the jail space and the places chance moves a player to.  The reason the jail space is higher is because of the “Go to Jail” space that automatically brings the player to the jail space along with the chance card that brings a player there, and because of the time spent in jail trying to roll to get out. The reason random spaces throughout the board are higher is due to the chance card bringing them there. If you look you will notice that GO, Illinois Avenue, St. Charles Place, and Boardwalk are the highest four excluding the jail, chance, and community chest spaces. This is due to the chance card having a chance of bringing a player to one of those spots, making it higher than most other spaces. A nuance made because of the jail space is seen 7-9 spaces after the jail space, where there is a slight uptick in the number of times landed. Because of the times landed on jail, it only makes sense that the spaces with an average two dice roll distance from jail should also see an increase in times landed on compared to the other spaces on the board.  
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(dplyr)
 library(knitr)
 
@@ -345,7 +345,7 @@ chance_results %>%
   # kable(digits = 2)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #this is without buying properties and whatnot
 simulate_economy_game <- function(players = 4, max_turns = 4000) {
   set.seed(2)
@@ -454,7 +454,7 @@ In this game, we observed the performance of four players across 4000 turns. We 
 
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 set.seed(1)
 
 #Prices and rent from monopoly spaces
