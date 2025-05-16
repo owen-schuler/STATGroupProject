@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = TRUE)
     Buying/Landing on properties
 - When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
 
-```{r}
+```{r, echo=FALSE}
 
 #Creates a data frame with the position, name, type of space, and corresponding color
 monopoly_board <- data.frame(
@@ -299,7 +299,7 @@ Analysis for monopoly most common spaces with jail, doubles, and chance:
 From a sample of 4 players each having 1000 turns while including jail and double rules along with chance cards, we found that there is only a noticeable difference in amount landed in the jail space and the places chance moves a player to.  The reason the jail space is higher is because of the “Go to Jail” space that automatically brings the player to the jail space along with the chance card that brings a player there, and because of the time spent in jail trying to roll to get out. The reason random spaces throughout the board are higher is due to the chance card bringing them there. If you look you will notice that GO, Illinois Avenue, St. Charles Place, and Boardwalk are the highest four excluding the jail, chance, and community chest spaces. This is due to the chance card having a chance of bringing a player to one of those spots, making it higher than most other spaces. A nuance made because of the jail space is seen 7-9 spaces after the jail space, where there is a slight uptick in the number of times landed. Because of the times landed on jail, it only makes sense that the spaces with an average two dice roll distance from jail should also see an increase in times landed on compared to the other spaces on the board.  
 
 
-```{r}
+```{r, echo=FALSE}
 players <- 4
 turns <- 1000
 total_player_turns <- players * turns
@@ -324,7 +324,7 @@ ggplot(chance_results, aes(x = reorder(Name, Position), y = AveragePerPlayerTurn
   theme(axis.text.x = element_text(angle = 90, size = 7),
         plot.title = element_text(hjust = 0.5))
 ```
-```{r}
+```{r, echo=FALSE}
 expected_visits <- rep(sum(chance_results$Visits) / 40, 40)  # Uniform expectation
 observed_visits <- chance_results$Visits
 
@@ -345,7 +345,7 @@ chance_results %>%
   kable(digits = 2)
 ```
 
-```{r}
+```{r, echo=FALSE}
 #this is without buying properties and whatnot
 simulate_economy_game <- function(players = 4, max_turns = 4000) {
   set.seed(2)
@@ -454,7 +454,7 @@ In this game, we observed the performance of four players across 4000 turns. We 
 
 
 
-```{r}
+```{r, echo=FALSE}
 set.seed(1)
 
 #Prices and rent from monopoly spaces
@@ -596,7 +596,7 @@ Which properties are most often owned by winners without free parking?
 
 The top 5 properties that are most owned by winners in highest to lowest are St. Charles Place, States Avenue, Vermont Avenue, Connecticut Avenue, and Tennessee Avenue all game won a little bit over 60. The 5 lowest properties from highest to lowest are Boardwalk, Indiana Avenue, North Carolina Avenue, Park Place, and Pennsylvania Avenue.  From this data we suggest owning the first 5 properties listed to have the best chance of winning the game of monopoly when free parking is not involved. 
 
-```{r free parking}
+```{r free parking, echo=FALSE}
 set.seed(5)
 
 #HAD TO REMOVE GETTING PAID FROM GO FEATURE, OTHERWISE PLAYERS WOULD NOT GET ELIMINATED
@@ -739,7 +739,7 @@ The top 5 properties that are most owned by winners in highest to lowest are Ten
 
 
 
-```{r}
+```{r, echo=FALSE}
 set.seed(5)
 
 simulate_game_length <- function(n=200, players=4){
@@ -763,7 +763,7 @@ ggplot(df, aes(x=values))+
   geom_histogram(bins=50)
 ```
 
-```{r}
+```{r, echo=FALSE}
 set.seed(5)
 
 simulate_game_no_bank <- function(players = 4, max_turns =1000) {
@@ -886,6 +886,6 @@ ggplot(df_no_bank, aes(x=values))+
 
 Analysis for how long games typically last: 
 
-Our initial simulation was a sample of 500 games that included jail, free parking, and bank mechanics. The maximum number of turns allowed by the simulation was 1000. On average, these games lasted 101 turns and had a median of 61. The shortest game was 19 turns and the longest was a set of outliers at 1000 turns. In the second simulation, jail and free parking were included and all money paid to the bank instead went to free parking. This led to considerably longer games. In a sample of 100, the mean was 706 and the median was at the turn limit of 1000. The shortest game in this sample was 26 turns. Increasing the turn limit was not feasible with our resources. It was expected that adding free parking would increase the length of games, but we did not think it would be by this much. Without free parking, the money essentially “disappeared” from the game if a player lost it to tax or a card. But with free parking, this money was always in circulation and inevitably was going to end up in the hands of a player. At this point, for the games that did end, it was essentially luck that the same player landed on free parking repeatedly while the others did not. 
+Our initial simulation was a sample of 500 games that included jail, free parking, and bank mechanics. The maximum number of turns allowed by the simulation was 1000. On average, these games lasted 101 turns and had a median of 61. The shortest game was 19 turns and the longest was a set of outliers at 1000 turns. In the second simulation, jail and free parking were included and all money paid to the bank instead went to free parking. This led to considerably longer games. In a sample of 100, the mean was 698 and the median was at the turn limit of 1000. The shortest game in this sample was 26 turns. Increasing the turn limit was not feasible with our resources. It was expected that adding free parking would increase the length of games, but we did not think it would be by this much. Without free parking, the money essentially “disappeared” from the game if a player lost it to tax or a card. But with free parking, this money was always in circulation and inevitably was going to end up in the hands of a player. At this point, for the games that did end, it was essentially luck that the same player landed on free parking repeatedly while the others did not. 
 
  
