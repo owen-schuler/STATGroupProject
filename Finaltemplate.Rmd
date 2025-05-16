@@ -2,7 +2,7 @@
 title: "Monopoly Final Project"
 author: "Landen Frye, Caden Rummel, Luke Olson, Owen Schuler"
 output: word_document
-date: "2025-04-11"
+date: "2025-05-15"
 ---
 
 ```{r setup, include=FALSE}
@@ -38,6 +38,9 @@ knitr::opts_chunk$set(echo = TRUE)
     Buying/Landing on properties
 - When you land on a property that hasn't been bought already, you are able to buy it if desired. If you land on a property that another player owns, you have to pay them an amount based on the property and houses on it. 
 
+
+
+2. Which properties are landed on most frequently?
 ```{r, echo=FALSE}
 
 #Creates a data frame with the position, name, type of space, and corresponding color
@@ -88,11 +91,19 @@ basic_results <- simulate_basic()
 ggplot(basic_results, aes(x = reorder(Name, Position), y = Visits, fill = Color)) +
   geom_col() +
   scale_fill_manual(values = monopoly_colors) +
-  labs(title = "Monopoly Most Common Spaces Without Jail",
+  labs(title = "Basic Monopoly Most Common Spaces",
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7), 
         plot.title = element_text(hjust = 0.5))
+```
 
+Analysis for monopoly most common spaces without jail, doubles or chance: 
+
+From a sample of 4 players each having 1000 turns, we found that without any rules and just using basic movement around the board there isn’t a significant difference between the number of times each space was landed on. Most spaces are hovering around 100 times being landed on. In the chart it seems like chance and community chest are landed on significantly more often, but this is because there are 3 of each on the board, thus explaining why they are landed on roughly 3 times as much as the other spaces. Besides this, there is pretty uniform distribution with each space having about a 2.5% or 1/40 chance of being landed on by a player. 
+
+
+3. Improve your system to incorporate going to jail, including the doubles-rolling condition. Which properties are landed on most frequently now?
+```{r, echo=FALSE}
 #simulations with jail and rolling doubles
 simulate_with_jail <- function(players = 4, turns = 1000) {
   positions <- rep(0, players)
@@ -167,11 +178,19 @@ jail_results <- simulate_with_jail()
 ggplot(jail_results, aes(x = reorder(Name, Position), y = Visits, fill = Color)) +
   geom_col() +
   scale_fill_manual(values = monopoly_colors) +
-  labs(title = "Monopoly Most Common Spaces with Jail and Doubles",
+  labs(title = "Most Common Spaces with Jail and Doubles",
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7), 
         plot.title = element_text(hjust = 0.5))
+```
 
+Analysis for monopoly most common spaces with jail and doubles: 
+
+From a sample of 4 players each having 1000 turns, there is only a significant difference for spots landed on for just visiting/jail and a minor increase in chance / colors directly after jail. This is expected because the jail function was added and when a player lands on the go to jail space, it also counts a visit to the jail/just/visiting space. In essence, this makes it twice as likely that a player will land on the jail space when they go around the board. With chance being 7 spaces after jail, it makes it the most likely spot to land after going to jail, which would explain the increase in that.  The colors following jail also saw a minor increase, and that would be because the player is spending more time over there in the grand scheme of things. 
+
+
+4. Incorporate the movement cards into your system. You can ignore the effects of non-movement cards, but not their existence! Which properties are landed on most frequently now?
+```{r, echo=FALSE}
 #adds movement effect for Chance cards
 chance_movements <- c("GO" = 0, "Illinois Avenue" = 24, "St. Charles Place" = 11,
                       "Boardwalk" = 39, "Jail" = 10, "Back 3 Spaces" = -3) 
@@ -260,46 +279,27 @@ chance_results <- simulate_with_chance()
 ggplot(chance_results, aes(x = reorder(Name, Position), y = Visits, fill = Color)) +
   geom_col() +
   scale_fill_manual(values = monopoly_colors) +
-  labs(title = "Monopoly Most Common Spaces with Jail, Doubles, and Chance",
+  labs(title = "Most Common Spaces with Everything",
        x = "Board Space", y = "Visits") +
   theme(axis.text.x = element_text(angle = 90, size = 7),
         plot.title = element_text(hjust = 0.5))
 
-#Creates a summary table sorted by the most visited
-summary_visits <- chance_results[order(-chance_results$Visits), c("Position", "Name", "Visits")]
+# summary_visits <- chance_results[order(-chance_results$Visits), c("Position", "Name", "Visits")]
+# didnt need at the end
 
-# Print summary
-print(summary_visits)
+# print(summary_visits) didnt need this at the end
 
-#load necessary packages
-library(dplyr)
-library(knitr)
-
-#displays the summary table in a formatted sense and makes it visually easy to understand
-chance_results %>%
-  select(Position, Name, Visits) %>%
-  arrange(desc(Visits)) %>%
-  kable() #got this from chatgpt
 ```
-
-Analysis for monopoly most common spaces without jail: 
-
-From a sample of 4 players each having 1000 turns, we found that without any rules and just using basic movement around the board there isn’t a significant difference between the number of times each space was landed on. Most spaces are hovering around 100 times being landed on. In the chart it seems like chance and community chest are landed on significantly more often, but this is because there are 3 of each on the board, thus explaining why they are landed on roughly 3 times as much as the other spaces. Besides this, there is pretty uniform distribution with each space having about a 2.5% or 1/40 chance of being landed on by a player. 
-
  
-
-Analysis for monopoly most common spaces with jail and doubles: 
-
-From a sample of 4 players each having 1000 turns, there is only a significant difference for spots landed on for just visiting/jail and a minor increase in chance / colors directly after jail. This is expected because the jail function was added and when a player lands on the go to jail space, it also counts a visit to the jail/just/visiting space. In essence, this makes it twice as likely that a player will land on the jail space when they go around the board. With chance being 7 spaces after jail, it makes it the most likely spot to land after going to jail, which would explain the increase in that.  The colors following jail also saw a minor increase, and that would be because the player is spending more time over there in the grand scheme of things. 
-
- 
-
 Analysis for monopoly most common spaces with jail, doubles, and chance: 
 
 From a sample of 4 players each having 1000 turns while including jail and double rules along with chance cards, we found that there is only a noticeable difference in amount landed in the jail space and the places chance moves a player to.  The reason the jail space is higher is because of the “Go to Jail” space that automatically brings the player to the jail space along with the chance card that brings a player there, and because of the time spent in jail trying to roll to get out. The reason random spaces throughout the board are higher is due to the chance card bringing them there. If you look you will notice that GO, Illinois Avenue, St. Charles Place, and Boardwalk are the highest four excluding the jail, chance, and community chest spaces. This is due to the chance card having a chance of bringing a player to one of those spots, making it higher than most other spaces. A nuance made because of the jail space is seen 7-9 spaces after the jail space, where there is a slight uptick in the number of times landed. Because of the times landed on jail, it only makes sense that the spaces with an average two dice roll distance from jail should also see an increase in times landed on compared to the other spaces on the board.  
 
 
 ```{r, echo=FALSE}
+library(dplyr)
+library(knitr)
+
 players <- 4
 turns <- 1000
 total_player_turns <- players * turns
@@ -313,13 +313,13 @@ summary_table <- chance_results %>%
 
 # Show as nice table
 library(knitr)
-kable(summary_table, digits = 4)
+# kable(summary_table, digits = 4) #got this from chatgpt, didnt need in final report
 ggplot(chance_results, aes(x = reorder(Name, Position), y = AveragePerPlayerTurn, fill = Color)) +
   geom_col() +
   scale_fill_manual(values = monopoly_colors) +
   geom_text(aes(label = round(AveragePerPlayerTurn, 4)), 
             vjust = -0.3, size = 3, angle = 90) +
-  labs(title = "Average Visits per Player Turn (With Jail & Chance)",
+  labs(title = "Average Visits per Player Turn With Everything",
        x = "Board Space", y = "Avg Visits per Player Turn") +
   theme(axis.text.x = element_text(angle = 90, size = 7),
         plot.title = element_text(hjust = 0.5))
@@ -332,7 +332,7 @@ observed_visits <- chance_results$Visits
 chisq_test <- chisq.test(x = observed_visits, p = rep(1/40, 40))
 
 # Output test results
-print(chisq_test)
+print(chisq_test) #didnt want in final report
 chance_results$Expected <- expected_visits
 chance_results$Deviation <- chance_results$Visits - expected_visits
 chance_results$StdResidual <- (chance_results$Visits - expected_visits) / sqrt(expected_visits)
@@ -341,8 +341,8 @@ chance_results$StdResidual <- (chance_results$Visits - expected_visits) / sqrt(e
 chance_results %>%
   arrange(desc(abs(StdResidual))) %>%
   select(Name, Visits, Expected, Deviation, StdResidual) %>%
-  head(10) %>%
-  kable(digits = 2)
+  head(10)
+  # kable(digits = 2)
 ```
 
 ```{r, echo=FALSE}
